@@ -7,8 +7,9 @@ function Lobby(){
   const [ err, setErr ] = useState(null);
 
 
-  useEffect( async () = {
-    const gameId = parseInt(history.location.pathname.pop(), 10)
+  useEffect( async () => {
+    const location = history.location.pathname.split('/');
+    const gameId = parseInt(location[location.length - 1], 10)
     if(isFirst){
       try{
         const res = await fetch(process.env.URL + `/api/game/${gameId}/players`);
@@ -23,14 +24,22 @@ function Lobby(){
         });
         setPlayers(json.players);
       }catch(e){
-
+        setErr(e);
       }
       setIsFirst(false);
     }
   })
 
   return(
-
+    <div>
+      {
+        players.map(player => {
+          <div>
+            {player.user_name}
+          </div>
+        })
+      }
+    </div>
   );
 }
 

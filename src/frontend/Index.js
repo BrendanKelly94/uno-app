@@ -5,6 +5,7 @@ import App from './App.js'
 import Home from './Home.js';
 import GamesList from './GamesList.js';
 import Lobby from './Lobby.js';
+import HostLobby from './HostLobby.js'
 import AuthStoreProvider from './providers/AuthStoreProvider';
 import history from './utils/history.js';
 
@@ -17,6 +18,7 @@ function Index() {
           <Route path = '/' exact component = {Home} />
           <Route path = '/gamesList' exact component = {GamesList} />
           <Route path = '/lobby/:id' exact component = {Lobby} />
+          <Route path = '/lobby/host/:id' exact component = {HostLobby} />
           <Route path = "/game/:id" exact component = {App} />
         </Switch>
       </Router>

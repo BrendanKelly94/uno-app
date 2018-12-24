@@ -7,8 +7,7 @@ import TextField from '@material-ui/core/TextField';
 function AuthModal({ open , setOpen, login }){
   const [ auth, setAuth ] = useState({name: '', pwd: '', rePwd: ''});
   const [ reg, setReg ] = useState(false);
-  const [ err, setErr ] = useState(null);
-  const [ success, setSuccess ] = useState(false)
+  const [ status , setStatus ] = useState({err: false, success: null})
   const containerStyle = {
     position: 'absolute',
     width: '50%',
@@ -58,16 +57,16 @@ function AuthModal({ open , setOpen, login }){
         });
       const json = await res.json();
       if(json.hasOwnProperty('name')){
-        setSuccess(true);
+        setStatus({err: null, success: true})
         setTimeout(() => {
           setOpen(false);
         }, 500)
         login(auth.name, auth.pwd)
       }else{
-        setErr(json.err);
+        setStatus({err: json.err})
       }
     }catch(e){
-      setErr(e);
+      setStatus({err: e})
     }
   }
 
@@ -86,23 +85,23 @@ function AuthModal({ open , setOpen, login }){
       });
       const json = await res.json();
       if(json.hasOwnProperty('name')){
-        setSuccess(true)
+        setStatus({err: null, success: true});
         login(auth.name, auth.pwd)
       }else{
-        setErr(json.err);
+        setStatus({...status, err: json.err});
       }
     }catch(e){
-      setErr(e);
+      setStatus({...status, err: e});
     }
   }
 
   useEffect(() => {
     if(!open){
-      setErr(null);
+      setStatus({...status, err: null});
     }
   },[open])
 
-
+  const { err, success } = status;
   return(
     <Modal
           aria-labelledby="log into account"

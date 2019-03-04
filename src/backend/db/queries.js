@@ -122,7 +122,7 @@ const replacePlayer = async ({playerId, name}) => {
            user_name: name,
            is_bot: (name === 'bot')? true: false,
          })
-         .returning('user_name')
+         .returning('id')
 }
 
 const getPlayers = ({gameId}) => {
@@ -143,6 +143,12 @@ const findPlayer = ({name}) => {
   return knex('Players')
          .where({user_name: name})
          .select()
+}
+
+const getPlayerHandCount = ({playerId}) => {
+  return knex('GameCards')
+         .count('id')
+         .where({player_id: playerId})
 }
 
 
@@ -174,6 +180,11 @@ const setFirstCardInPlay = async ({gameId}) => {
       random = deck[Math.floor(Math.random() * deck.length)];
       if(random.is_available === true) found = true;
     }
+    if(random.color === 'black'){
+      const colors = ['red', 'yellow', 'green', 'blue'];
+      const randomC = colors[Math.floor(Math.random() * 4)];
+      const cChange = await changeColor({cId: randomC.id, color: randomC});
+    }
     return knex('GameCards')
            .where('id', random.id)
            .update({
@@ -187,14 +198,19 @@ const setFirstCardInPlay = async ({gameId}) => {
   }
 }
 
-const setCardInPlay = async ({gameId, playerId, card}) => {
+const setCardInPlay = async ({gameId, playerId, cId}) => {
+  const colors = ['red', 'blue', 'green', 'yellow'];
   try{
+    const cIP = await getCard({cardId: cId});
+    if(cIP[0].color === 'black'){
+      const randomC = colors[Math.floor(Math.random() * colors.length)];
+      const changeC = await changeColor({cId: cId, color: randomC});
+      console.log('colorChange', changeC)
+    }
     const x = await removeCardInPlay({gameId: gameId});
     return knex('GameCards')
            .where({
-             player_id: playerId,
-             value: card.value,
-             color: card.color
+             id: cId
             })
             .update({
               player_id: null,
@@ -208,16 +224,26 @@ const setCardInPlay = async ({gameId, playerId, card}) => {
 }
 
 const removeCardInPlay = async ({gameId}) => {
-  return knex('GameCards')
-         .where({
-           game_id: gameId,
-           is_in_play: true
-         })
-         .update({
-           is_in_play: false,
-           is_available: true
-         })
-         .returning('id');
+  try{
+    const cIP = await getCardInPlay({gameId: gameId});
+    if(cIP[0].value === 13 || cIP[0].value === 14){
+      await changeColor({cId: cIP[0].id, color: 'black'});
+    }
+    return knex('GameCards')
+           .where({
+             game_id: gameId,
+             is_in_play: true
+           })
+           .update({
+             is_in_play: false,
+             is_available: true
+           })
+           .returning('id');
+  }catch(e){
+    console.log(e);
+    throw new Error(e);
+  }
+
 }
 
 const getCardInPlay = async ({gameId}) => {
@@ -250,7 +276,7 @@ const generateDeck = async ({gameId}) => {
     val = (i % 13) + 1;
     cards.push({
       game_id: gameId,
-      color: colors[colorI],
+      color: (val === 13 || val === 14)?'black':colors[colorI],
       value: (val === 13 && i > 52)? 14: val,
       is_in_play: false,
       is_available: true
@@ -382,7 +408,7 @@ const giveCards = async ({gameId, num}) => {
            .update({
              player_id: nextTurn.id
            })
-           .returning('id')
+           .returning('player_id')
 
   }catch(e){
     throw new Error(e);
@@ -426,6 +452,13 @@ const drawCard = async ({gameId, playerId}) => {
   }catch(e){
     throw new Error(e);
   }
+}
+
+const changeColor = async ({cId, color}) => {
+  return knex("GameCards")
+    .where('id', cId)
+    .update({color: color})
+    .returning('id')
 }
 
 //testing
@@ -478,6 +511,7 @@ module.exports = {
   setTurn: setTurn,
   addPlayer: addPlayer,
   updatePlayerCount: updatePlayerCount,
+  getPlayerHandCount: getPlayerHandCount,
   removePlayer: removePlayer,
   replacePlayer: replacePlayer,
   getPlayers: getPlayers,
@@ -497,5 +531,6 @@ module.exports = {
   flipDirection: flipDirection,
   giveCards: giveCards,
   drawCard: drawCard,
+  changeColor: changeColor,
   customHand: customHand
 }

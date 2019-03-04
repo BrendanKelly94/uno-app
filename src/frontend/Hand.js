@@ -1,10 +1,20 @@
 import React, { useContext, useState, useEffect } from 'react';
 import gameStoreContext from './context/gameStoreContext';
+import ApiEndpoint from './utils/ApiEndpoint';
 import HandCard from './HandCard';
+import Card from './Card';
 import gsap from 'gsap';
+import history from './utils/history';
 
-const Hand = React.memo(({ hand, isMyTurn, lastTurnId, scaleFactor, submitCard, isAnimating }) => {
-  const [options, setOptions] = useState([]);
+
+const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, drawCard, submitCard, isAnimating }) => {
+  const [ options, setOptions ] = useState([]);
+  const [ prevCount, setPrevCount ] = useState(hand.length);
+  const [ hasDrawn, setHasDrawn ] = useState({status:false, card: null});
+  const [ colorChange, setColorChange ] = useState({status:false, cardId: null});
+
+  const location = history.location.pathname.split('/');
+  const gameId = location[location.length - 1];
   const containerStyle = {
     position: 'absolute',
     left: '50%',
@@ -13,76 +23,178 @@ const Hand = React.memo(({ hand, isMyTurn, lastTurnId, scaleFactor, submitCard, 
     display: 'flex',
     justifyContent: 'center'
   }
-  const tl = new TimelineLite;
 
-  function handleClick(e){
-    if(!isAnimating){
-      const cardClass = e.currentTarget.classList[0];
-      //.hand-value-color
-      const classArr = cardClass.split('-');
+  const cChangeContainerStyle = {
+      position: 'absolute',
+      width: '50%',
+      height: '50%',
+      left: '50%',
+      top: '50%',
+      transform: 'translate(-50%, -50%)',
+      display: 'flex',
+      justifyContent: 'center',
+      backgroundColor: 'grey'
+  }
+
+  const drawBoxStyle = {
+    position: 'absolute',
+    width: '70%',
+    height: `${70 * scaleFactor}px`,
+    left:'50%',
+    top: '50%',
+    transform: 'translate(-50%, -50%)',
+    backgroundColor: 'transparent'
+  }
+  // const tl = new TimelineLite;
+
+  function handleOptionClick(e){
+    if(!isAnimating && isMyTurn){
+      const eId = e.currentTarget.id;
+      const cardId = parseInt(eId.split('-')[1], 10);
+      const index = hand.findIndex((card) => cardId === card.id);
       let isOption = false;
       for(let i = 0; i< options.length; i++){
-        if(options[i].value == classArr[1] && options[i].color === classArr[2]){
+        if(options[i].id === cardId){
           isOption = true;
           break;
         }
       }
-      if(isOption){
-        const source = document.querySelector(`.${cardClass}`);
-        const target = document.getElementById('card-in-play');
-        const sBox = source.getBoundingClientRect();
-        const tBox = target.getBoundingClientRect();
-        const translate = {
-          x: tBox.x - sBox.x,
-          y: tBox.y - sBox.y
-        }
-        const variance = Math.random() * (5 - (-5)) + (-5);
-
-        tl
-        .to(source, .5, {x: translate.x/scaleFactor, y: translate.y/scaleFactor, rotation: variance, scale: 1.2,
-          onComplete: () => {
-            submitCard({value: classArr[1], color: classArr[2], variance: variance})
-          }
-        })
-        .to('.hand-card', .5, {yPercent: 0})
+      if(isOption && hand[index].color !== 'black'){
+        submitCardAction({cardId:cardId});
+      }else{
+        if(isOption) setColorChange({status: true, cardId:cardId});
       }
     }
   }
 
-  useEffect(() => {
-    if(isMyTurn){
-      const options = [
-        {value:1, color: 'green', id:0},
-        {value:3, color: 'green', id:2}
-      ]
-      let selector = options.reduce((acc, cur) => {
-        return acc += `.hand-${cur.value}-${cur.color}, `
-      }, '')
-      selector = selector.substring(0, selector.length-2)
-      tl.to(selector, .5, {yPercent: -50})
+  async function handleDrawClick(){
+    if(isMyTurn && !isAnimating){
+      try{
+        const card = await drawCard();
+        tl.to('.hand-card', .5, {
+          onComplete: () => setHasDrawn({status: true, card: card})
+        })
+      }catch(e){
+        console.log(e);
+      }
+    }
+  }
 
-      setOptions(options);
+  function handleColorChange(e){
+    const eId = e.target.id;
+    const color = eId.split('-')[1];
+    setColorChange({status: false, cardId: null})
+    submitCardAction({cardId: colorChange.cardId, color: color})
+  }
+
+  function submitCardAction({cardId, color}){
+    if(cardId !== -1 && (isMyTurn && myId !== null)){
+      const cI = hand.findIndex((card) => card.id === cardId);
+      const source = document.getElementById(`hand-${cardId}`)
+      const target = document.getElementById('card-in-play');
+      const sBox = source.getBoundingClientRect();
+      const tBox = target.getBoundingClientRect();
+      const translate = {
+        x: tBox.x - sBox.x,
+        y: tBox.y - sBox.y
+      }
+      const variance = Math.random() * (5 - (-5)) + (-5);
+
+      tl
+      .to(source, .5, {x: translate.x/scaleFactor, y: translate.y/scaleFactor, rotation: variance, scale: 1.2,
+        onComplete: () => {
+          submitCard({cId: cardId, color: color, variance: variance})
+        }
+      })
+      .to('.hand-card', .2, {})
+      .to('.hand-card', .5, {yPercent: 0})
+    }else{
+      submitCard({cId: cardId});
+      tl
+      .to('.hand-card', .5, {yPercent: 0})
+    }
+    setOptions([])
+  }
+
+  useEffect(async () => {
+    if(isMyTurn && myId !== null){
+      try{
+        const optionsData = await new ApiEndpoint(`http://localhost:3000/api/game/${gameId}/getHandOptions/${myId}`).getReq();
+        let selector = optionsData.options.reduce((acc, cur) => {
+          return acc += `#hand-${cur.id}, `
+        }, '')
+        selector = selector.substring(0, selector.length-2)
+        if(selector.length > 0){
+          tl.to(selector, .5, {yPercent: -50})
+        }
+        setOptions(optionsData.options);
+      }catch(e){
+        console.log(e);
+      }
     }
   }, [isMyTurn]);
 
+  useEffect(async () => {
+      //get options
+      //submitCard based on options
+      if(hasDrawn.status){
+        try{
+          const optionsData = await new ApiEndpoint(`http://localhost:3000/api/game/${gameId}/getHandOptions/${myId}`).getReq();
+          const os = optionsData.options;
+          console.log(options, os)
+
+          if(os.length > options.length){
+            const drawIndex = os.findIndex((card) => card.id === hasDrawn.card.id);
+            if(os[drawIndex].value === 13 || os[drawIndex].value === 14){
+              setColorChange({status: true, cardId: os[drawIndex].id})
+            }else{
+              submitCardAction({cardId: os[drawIndex].id});
+            }
+          }else{
+            submitCardAction({cardId: -1});
+          }
+
+          setHasDrawn({status: false, card: null});
+        }catch(e){
+          console.log(e);
+        }
+      }
+
+  }, [hasDrawn])
 
   return(
-    <div style = {containerStyle}>
-      {
-        hand.map((item, i) =>
-          <HandCard
-            key = {item.color + item.value + '' + i}
-            value = {item.value}
-            color = {item.color}
-            cClass = {`hand-${item.value}-${item.color} hand-card`}
-            style = {{
-              transformOrigin: 'top left',
-            }}
-            submitCard = {handleClick}
-          />
-        )
+    <React.Fragment>
+      <div id = {`player-${myId}-card-0`} style = {containerStyle}>
+        {
+          hand.map((item, i) =>
+            <HandCard
+              key = {'hand-'+item.id}
+              value = {item.value}
+              color = {item.color}
+              cId = {`hand-${item.id}`}
+              cClass = {'hand-card'}
+              style = {{
+                transformOrigin: 'top left',
+              }}
+              submitCard = {handleOptionClick}
+            />
+          )
       }
+    </div>
+    {
+      <div style = {drawBoxStyle} onClick = {handleDrawClick}></div>
+    }
+    {
+     colorChange.status?
+     <div style = {cChangeContainerStyle}>
+       <Card callback = {handleColorChange} cId = 'color-red' style = {{backgroundColor: 'red'}}/>
+       <Card callback = {handleColorChange} cId = 'color-blue' style = {{backgroundColor: 'blue'}}/>
+       <Card callback = {handleColorChange} cId = 'color-green' style = {{backgroundColor: 'green'}}/>
+       <Card callback = {handleColorChange} cId = 'color-yellow' style = {{backgroundColor: 'yellow'}}/>
      </div>
+     :null
+   }
+     </React.Fragment>
   );
 }, (oldP, newP) => {
 

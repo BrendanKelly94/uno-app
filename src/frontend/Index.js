@@ -18,7 +18,6 @@ function Index() {
           <Route path = '/' exact component = {Home} />
           <Route path = '/gamesList' exact component = {GamesList} />
           <Route path = '/lobby/:id' exact component = {Lobby} />
-          <Route path = '/lobby/host/:id' exact component = {HostLobby} />
           <Route path = "/game/:id" exact component = {App} />
         </Switch>
       </Router>

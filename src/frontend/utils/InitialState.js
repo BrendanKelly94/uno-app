@@ -12,6 +12,7 @@ const InitialState = {
     { id: 5, name: "bot", cardCount: 7, isAnimating: false },
     { id: 6, name: "bot", cardCount: 7, isAnimating: false }
   ],
+  shiftedPlayers: [],
   hand: [
     {value: 1, color: 'green'},
     {value: 2, color: 'green'},

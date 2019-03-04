@@ -1,6 +1,6 @@
 import React from 'react';
 
-function Card({ cId, style, nextTurn }){
+function Card({ cId, style, callback }){
   const cardStyle = {
     width: '50px',
     height: '70px',
@@ -10,7 +10,7 @@ function Card({ cId, style, nextTurn }){
     backgroundColor: 'blue',
   }
   return(
-    <div id = {cId?cId:''} onClick = {nextTurn? nextTurn: () => true}style = {style?{...cardStyle, ...style}:cardStyle}></div>
+    <div id = {cId?cId:''} onClick = {callback? callback: () => true}style = {style?{...cardStyle, ...style}:cardStyle}></div>
   );
 }
 

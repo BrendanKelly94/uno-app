@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import history from './utils/history.js';
 
 function GamesList(){
   const [ state, setState ] = useState({
@@ -13,6 +14,10 @@ function GamesList(){
     width: '60%',
     justifyContent: 'space-between',
     alignItems: 'center'
+  }
+
+  function handleJoin(e){
+    history.push(`lobby/${e.target.id}`);
   }
 
   //cdm
@@ -38,7 +43,7 @@ function GamesList(){
           <div>Game {game.id}</div>
           <div>{game.bot_fill?'Yes':'No'}</div>
           <div>{game.player_count}/6</div>
-          <button>Join</button>
+          <button id = {game.id} onClick = {handleJoin}>Join</button>
         </div>
       )
     }

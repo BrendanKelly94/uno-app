@@ -6,6 +6,7 @@ import useScale from './utils/useScale';
 import BuildPlayers from './utils/BuildPlayers'
 import FindInitTransform from './utils/FindInitTransform';
 import InitialState from './utils/InitialState';
+import ApiEndpoint from './utils/ApiEndpoint';
 import Player from './Player';
 import CardInPlay from './CardInPlay';
 import Hand from './Hand'
@@ -13,15 +14,30 @@ import HandCard from './HandCard';
 import Card from './Card'
 import DrawCard from './DrawCard';
 import io from 'socket.io-client';
+import history from './utils/history';
 
 function App() {
-  const [ state, setState ] = useState(InitialState)
   const [ login, setLogin ] = useContext(authStoreContext);
-  const [ isAnimating, setIsAnimating ] = useState(false);
-  const [ isFirstRender, setIsFirstRender ] = useState(true);
-  const scaleFactor = useScale();
+  const [ myId, setMyId ] = useState(null);
+  const [ isHost, setIsHost ] = useState(false);
+  const [ turnId, setTurnId ] = useState(null);
+  const [ lastTurnId, setLastTurnId ] = useState(null);
+  const [ newCard, setNewCard ] = useState({value: null, color: ''});
+  const [ middleCard, setMiddleCard ] = useState({});
+  const [ players, setPlayers ] = useState([]);
   const [ shiftedPlayers, setShiftedPlayers ] = useState([]);
+  const [ hand, setHand ] = useState([]);
+  const [ playerStatus, setPlayerStatus ] = useState({isAnimating: false, isDrawing: false, id: null})
+  const [ hasEnded, setHasEnded] = useState(false);
+  const [ wonName, setWonName ] = useState(null);
 
+  const scaleFactor = useScale();
+  const first = null;
+  const location = history.location.pathname.split('/');
+  const gameId = location[location.length - 1];
+  let socket;
+
+  const tl = new TimelineLite;
 
   const middleStyle = {
     display: 'flex',
@@ -32,151 +48,271 @@ function App() {
     width: '10em',
     transform: `translate(-50%, -50%) ${`scale(${scaleFactor.size + .2})`}`
   }
-  const tl = new TimelineLite;
 
-
-
-  function updateCardCount(num){
-    const temp = state.players.slice();
-    const index = temp.findIndex(player => player.id === state.last_turn_id);
-    temp[index].cardCount += num;
-    temp[index].isAnimating = false;
-    setState({
-      ...state,
-      players: temp
-    })
+  const endedStyle = {
+    display: 'flex',
+    justifyContent: 'center',
+    position: 'absolute',
+    left: '50%',
+    top: '50%',
+    transform: `translate(-50%, -50%)`,
+    width: '50%',
+    height: '50%',
+    backgroundColor: '#fff',
+    color: '#000',
+    fontSize: '2em'
   }
 
-  function nextTurn(){
-    const cards = [
-      {value: -1, color: ''},
-      {value: state.turn_id, color: 'blue'}
-    ];
-    const random = Math.floor(Math.random() * 2);
-    const index = state.players.findIndex(player => player.id === state.turn_id);
-    setState({
-      ...state,
-      newCard: cards[random],
-      last_turn_id: state.turn_id,
-      turn_id: state.players[(index + 1) % state.players.length].id
-    })
+  //functions
+
+  async function unload(e){
+    console.log('unload')
+    e.preventDefault();
+    e.returnValue = '';
+    socket.disconnect();
+    window.removeEventListener('unload', unload);
+    window.removeEventListener('beforeunload', confirmLeave)
+    if(isHost){
+      try{
+        if(isHost){
+          const endReq = new ApiEndpoint(`http://localhost:3000/api/game/${gameId}/end/${myId}`);
+          const endData = await endReq.postReq({hasWon: false});
+        }else{
+          const leaveReq = new ApiEndpoint(`http://localhost:3000/api/game/${gameId}/leave/${myId}`);
+          const leaveData = await leaveReq.postReq({})
+        }
+      }catch(e){
+        console.log(e);
+      }
+    }
+
   }
 
-  function submitCard({ value, color, variance }){
-    const playerIndex = state.players.findIndex(player => player.id === state.turn_id);
-    const tempHand = state.hand.slice();
-    const cardIndex = tempHand.findIndex(card => card.value == value && card.color === color);
-    const deleted = tempHand.splice(cardIndex, 1);
-    setState({
-      ...state,
-      hand: tempHand,
-      middleCard: {...deleted[0], variance: variance},
-      last_turn_id: state.turn_id,
-      turn_id: state.players[(playerIndex + 1) % state.players.length].id
-    })
-    // emit submitCard socket event
+  function confirmLeave(e){
+    console.log('confirmLeave')
+    e.preventDefault();
+    e.returnValue = ''
   }
 
-  function setPlayerAnimation(lastTurnId){
-    const temp = state.players.slice();
-    temp[lastTurnId].isAnimating = true
-    setState({...state, players: temp})
+  async function submitCard({ cId, color }){
+    try{
+      const submitEnd = new ApiEndpoint(`http://localhost:3000/api/game/${gameId}/submitCard/${myId}`);
+      const data = await submitEnd.postReq({cId: cId, color: color});
+      const handData = await new ApiEndpoint(`http://localhost:3000/api/getHand/${myId}`).getReq();
+      setHand(handData.hand);
+    }catch(e){
+      console.log(e);
+    }
   }
+
+  async function drawCard(){
+    try{
+      const drawData = await new ApiEndpoint(`http://localhost:3000/api/game/${gameId}/drawCard/${myId}`).getReq();
+      const handData = await new ApiEndpoint(`http://localhost:3000/api/getHand/${myId}`).getReq();
+
+      setPlayerStatus({id: myId, isAnimating: false, isDrawing: true})
+      tl
+      .to('#draw-card', .5, {
+        onComplete: () => {
+          setHand(handData.hand)
+        }
+      })
+
+      return drawData.card;
+    }catch(e){
+      console.log(e);
+    }
+  }
+
+  async function cardsGiven({playerId, myId}){
+    if(playerId === myId){
+      try{
+        const handData = await new ApiEndpoint(`http://localhost:3000/api/getHand/${myId}`).getReq();
+        setHand(handData.hand);
+      }catch(e){
+        console.log(e);
+      }
+    }else{
+      setPlayerStatus({id: playerId, isAnimating: false, isDrawing: false})
+      tl.to(`player-${playerId}-card-0`, .5, {
+        onComplete: () => {
+          setPlayerStatus({id: null, isAnimating: false, isDrawing: false});
+        }
+      })
+    }
+  }
+
+  //lifecycle hooks
 
   //cdm
   useEffect(async () => {
-    if(isFirstRender){
+    socket = io('/game',{transports: ['websocket'], upgrade: false});
+    socket.emit('join', {gameId: gameId});
+    let mId;
       try{
-        const res = await fetch(process.env.URL + '/game')
-        setShiftedPlayers(BuildPlayers({
-          players: state.players,
+        const gameData = await new ApiEndpoint(`http://localhost:3000/api/game/${gameId}`).getReq();
+        const playersData = await new ApiEndpoint(`http://localhost:3000/api/getPlayersWithCount/${gameId}`).getReq();
+        const myI = playersData.players.findIndex((player) => player.user_name === login.user_name);
+        mId = playersData.players[myI].id;
+        const handData = await new ApiEndpoint(`http://localhost:3000/api/getHand/${mId}`).getReq();
+        const cIPData = await new ApiEndpoint(`http://localhost:3000/api/getCardInPlay/${gameId}`).getReq();
+        const shift = BuildPlayers({
+          players: playersData.players,
           username: login.user_name,
           scaleFactor: scaleFactor
-        }))
-        setIsFirstRender(false);
+        });
+        setPlayers(playersData.players);
+        setShiftedPlayers(shift);
+        setIsHost(playersData.players[myI].is_host);
+        setMyId(mId);
+        setTurnId(gameData.game.turn_id);
+        setLastTurnId((myI -1 < 0)?playersData.players[playersData.players.length -1].id:mId);
+        setHand(handData.hand);
+        setMiddleCard(cIPData.card)
       }catch(e){
-
+        console.log(e);
       }
-    }
-  })
+
+      //socket events
+      socket.on('newTurn', async (data) => {
+        console.log(data)
+        try{
+          if(data.newCards.status){
+            await cardsGiven({playerId:data.newCards.id, myId: mId});
+          }
+          if(data.currTurn === mId){
+            const handData = await new ApiEndpoint(`http://localhost:3000/api/getHand/${mId}`).getReq();
+            setTurnId(data.currTurn);
+            setLastTurnId(data.lastTurn);
+            setNewCard((data.card.id === middleCard.id)?{id:-1}: data.card);
+            setHand(handData.hand)
+          }else{
+            if(data.hasDrawn){
+              setPlayerStatus({id: data.lastTurn, isAnimating: false, isDrawing: true})
+            }
+            setTurnId(data.currTurn);
+            setLastTurnId(data.lastTurn);
+            setNewCard((data.card.id === middleCard.id)?{id:-1}: data.card);
+
+          }
+        }catch(e){
+          console.log(e);
+        }
+      });
+
+      socket.on('playerLeft', async (data) => {
+        try{
+          const playersData = await new ApiEndpoint(`http://localhost:3000/api/game/${gameId}/players`);
+          setPlayers(playersData.players);
+          setShiftedPlayers(BuildPlayers({
+            players: playersData.players,
+            username: login.user_name,
+            scaleFactor: scaleFactor
+          }))
+        }catch(e){
+          console.log(e);
+        }
+      });
+
+      socket.on('end', (data) => {
+        setHasEnded(true);
+      });
+
+      socket.on('playerWon', async (data) => {
+        console.log('playerWOn')
+        try{
+          setWonName(data.user_name)
+        }catch(e){
+          console.log(e);
+        }
+      });
+
+  },[first])
 
   //re-render players when scaleFactor changes
   useEffect(() => {
-    setShiftedPlayers(BuildPlayers({
-      players: state.players,
+    const shift = BuildPlayers({
+      players: players,
       username: login.user_name,
       scaleFactor: scaleFactor
-    }))
+    })
+    setShiftedPlayers(shift);
   },[scaleFactor])
 
   //animate player's new card to middle
   useEffect(() => {
-    if(state.newCard.value !== -1 && state.last_turn_id !== state.my_id){
+    if(newCard.id !== -1 && lastTurnId !== myId){
       let source = document.getElementById('new');
-      let target = document.getElementById(`player-${state.last_turn_id}-card-0`);
-      const lastTurnId = state.players.findIndex(player => player.id === state.last_turn_id);
-      const initTransform = FindInitTransform(target, state.players[lastTurnId].rotate, scaleFactor.size);
+      let target = document.getElementById(`player-${lastTurnId}-card-0`);
+      const lastI = players.findIndex(player => player.id === lastTurnId);
+      const initTransform = FindInitTransform(target, players[lastI].rotate, scaleFactor.size);
       // animate
       target = document.getElementById('card-in-play')
       const bBox = target.getBoundingClientRect();
       const variance = Math.random() * (5 - (-5)) + (-5);
 
-      setIsAnimating(true);
       tl
       .to(source, 0, {x: initTransform.x, y: initTransform.y, rotation: initTransform.rotate, scale: scaleFactor.size,
-        onComplete: () => setPlayerAnimation(lastTurnId)
-      })
-      .to(source, .25, {opacity: 1, onComplete: () => updateCardCount(-1)}, '+=.25')
-      .to(source, .5, {x: bBox.x, y: bBox.y, rotation: variance, scale: scaleFactor.size + .2,
         onComplete: () => {
-          setState({...state, middleCard: {...state.newCard, variance: variance}})
+          setPlayerStatus({id: lastTurnId, isAnimating: true, isDrawing: false});
         }
       })
-      .to(source, 0 , {opacity:0, onComplete: () => setIsAnimating(false)})
-    }else{
-      if(!isFirstRender){
-        setIsAnimating(true);
-        tl.to('draw-card', .5, {
-          onComplete: () => {
-            updateCardCount(1);
-            setIsAnimating(false);
-          }
-        })
-      }
-    }
-  }, [state.newCard]);
-
-  //animate my new card to middle
-  useEffect(() => {
-    if(state.last_turn_id === state.my_id){
-      const target = document.getElementById('card-in-play');
-      //replace source with card from socket event
-      const source = document.getElementById(`hand-${1}-${'green'}`)
-      const tBox = target.getBoundingClientRect();
-      const sBox = source.getBoundingClientRect();
-      const variance = Math.random() * (5 - (-5)) + (-5);
-
-      tl
-      .to(source, .5, {x: (tBox.x - sBox.x)/scaleFactor, y:(tBox.y - sBox.y)/scaleFactor,
+      .to(source, .25, {opacity: 1}, '+=.25')
+      .to(source, .5, {x: bBox.x, y: bBox.y, rotation: variance, scale: scaleFactor.size + .2,
         onComplete: () => {
-          setState({...state, middleCard: {...state.newCard, variance: variance}})
+          setMiddleCard({...newCard, variance: variance})
+          setPlayerStatus({id: null, isAnimating: false, isDrawing: false})
         }
       })
       .to(source, 0, {opacity: 0})
+    }else if(newCard.id !== -1 && lastTurnId === myId){
+      setMiddleCard(newCard);
+    }else if(newCard.id === -1){
+      setPlayerStatus({id: lastTurnId, isAnimating: false, isDrawing: true});
+      tl.to('#new', .5, {onComplete: () => setPlayerStatus({id: null, isAnimating: false, isDrawing: false})});
     }
-  }, [state.newCard]);
+
+  }, [newCard]);
+
+  useEffect( () => {
+    if(myId !== null){
+      window.addEventListener('unload', unload)
+      window.addEventListener('beforeunload', confirmLeave)
+    }
+    return(() => {
+      window.removeEventListener('unload', unload);
+      window.removeEventListener('beforeunload', confirmLeave)
+    })
+  }, [myId])
+
+  useEffect(() => {
+    if(hasEnded){
+      setTimeout(() => {
+        history.push('/gamesList');
+      }, 2000)
+    }
+  }, [hasEnded])
+
+  useEffect(() => {
+    if(wonName !== null){
+      setTimeout(() => {
+        history.push('/gamesList');
+      }, 2000)
+    }
+  }, [wonName])
+
 
   return (
 
       <div>
-        <button style = {{ float: 'right'}} onClick = {nextTurn}>NextTurn</button>
         {
           shiftedPlayers.map((player) =>
             <Player
               key = {`player-${player.id}`}
+              tl = {tl}
               pId = {player.id}
-              cardCount = {player.cardCount}
-              isAnimating = {player.isAnimating}
+              turnId = {turnId}
+              playerStatus = {playerStatus}
               translate = {player.translate}
               rotate = {player.rotate}
               scale = {scaleFactor.size}
@@ -186,28 +322,32 @@ function App() {
 
         <div style = {middleStyle}>
           <DrawCard
-            lastTurnId = {state.last_turn_id}
-            newCard = {state.newCard}
+            tl = {tl}
+            playerStatus = {playerStatus}
+            myId = {myId}
             scaleFactor = {scaleFactor.size + .2}
-            isMyTurn = {(state.turn_id === state.my_id)? true: false}
+            isMyTurn = {(turnId === myId)? true: false}
           />
-          <CardInPlay card = {state.middleCard}/>
+          <CardInPlay card = {middleCard}/>
         </div>
 
         <Hand
-          hand = {state.hand}
-          isMyTurn = {(state.turn_id === state.my_id)? true: false}
-          lastTurnId = {state.last_turn_id}
+          tl = {tl}
+          myId = {myId}
+          hand = {hand}
+          isMyTurn = {(turnId === myId)? true: false}
+          lastTurnId = {lastTurnId}
           scaleFactor = {scaleFactor.size}
           submitCard = {submitCard}
-          isAnimating = {isAnimating}
+          drawCard = {drawCard}
+          isAnimating = {playerStatus.isAnimating}
         />
 
 
         <HandCard
           cId = 'new'
-          value = {state.newCard.value}
-          color = {state.newCard.color}
+          value = {newCard.value}
+          color = {newCard.color}
           style = {{
             position: 'absolute',
             left: 0,
@@ -216,6 +356,22 @@ function App() {
             opacity: 0
           }}
         />
+
+        {
+          hasEnded?
+          <div style = {endedStyle}>
+            Host has Ended Game
+          </div>
+          :null
+        }
+
+        {
+          wonName?
+          <div style = {endedStyle}>
+            Player {wonName} has won the game!
+          </div>
+          :null
+        }
       </div>
   );
 }

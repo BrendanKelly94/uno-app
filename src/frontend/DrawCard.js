@@ -2,22 +2,21 @@ import React, { useEffect, useState } from 'react';
 import Card from './Card';
 import { TweenLite, TimelineLite, TimelineMax } from 'gsap';
 
-const DrawCard = React.memo(({ lastTurnId, newCard, scaleFactor, isMyTurn }) => {
+const DrawCard = React.memo(({ tl, playerStatus, myId, scaleFactor, isMyTurn}) => {
   const [ isFirst, setIsFirst ] = useState(true);
-  const [ isGlowing, setIsGlowing ] = useState(false);
   const range = [...Array(4)].map((_, i) => i);
-  const tl = new TimelineLite; //transform animation
-  const tlm = new TimelineMax({repeat: -1, yoyo: true, paused: true})
-  tlm.to('#draw-card', 1,  {backgroundColor: '#fff'});
+  // const tl = new TimelineLite;
 
   useEffect(() => {
-    if(!isFirst && newCard.value === -1){
+    if(!isFirst && playerStatus.isDrawing){
+      console.log('drawing')
       const source = document.getElementById('draw-animate');
-      const target = document.getElementById(`player-${lastTurnId}-card-0`);
+      const target = document.getElementById(`player-${playerStatus.id}-card-0`);
       const sBox = source.getBoundingClientRect();
       const tBox = target.getBoundingClientRect();
+
       const transform = {
-        x: tBox.x - sBox.x,
+        x: (myId === playerStatus.id)?tBox.right - sBox.right:tBox.x - sBox.x,
         y: tBox.y - sBox.y
       }
 
@@ -30,16 +29,8 @@ const DrawCard = React.memo(({ lastTurnId, newCard, scaleFactor, isMyTurn }) => 
     }else{
       setIsFirst(false);
     }
-  }, [newCard]);
+  }, [playerStatus]);
 
-  useEffect(() => {
-    console.log(tlm)
-    if(isMyTurn){
-      tlm.paused(false);
-    }else{
-      tlm.paused(true);
-    }
-  },[isMyTurn])
 
   return(
     <div style = {{display: 'flex'}}>
@@ -66,7 +57,11 @@ const DrawCard = React.memo(({ lastTurnId, newCard, scaleFactor, isMyTurn }) => 
     </div>
   )
 }, (oldP, newP) => {
-
+  if(oldP.playerStatus.id === newP.playerStatus.id || newP.playerStatus.id === null){
+    return true;
+  }else{
+    return false;
+  }
 })
 
 export default DrawCard;

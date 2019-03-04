@@ -169,6 +169,7 @@ describe('Queries unit testing', _ => {
     }));
   });
 
+
   describe('removePlayer()', _ => {
     it('should remove player from game' , asyncHOF(async () => {
       const result = await queries.removePlayer({gameId: 1, playerId: 1});
@@ -186,7 +187,7 @@ describe('Queries unit testing', _ => {
   describe('getPlayers()' , _ => {
     it('gets a list of players given gameId', asyncHOF(async () => {
       const players = await queries.getPlayers({gameId: 1});
-      players.should.a('array');
+      players.should.be.a('array');
     }));
   });
 
@@ -203,6 +204,13 @@ describe('Queries unit testing', _ => {
       player[0].user_name.should.equal('brendan')
     }));
   });
+
+  describe('getPlayerHandCount()', _ => {
+    it('returns the number of cards a specific player has', asyncHOF(async () => {
+      const pHC = await queries.getPlayerHandCount({playerId: 1});
+      pHC.should.be.a('number');
+    }))
+  })
 
   describe('getCard()' , _ => {
     it('gets a card based on cardId', asyncHOF(async () => {

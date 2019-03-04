@@ -11,7 +11,7 @@ const registerRouter = require('./routes/register');
 const apiRouter = require('./routes/api');
 
 const app = express();
-app.io = require('socket.io')();
+app.io = require('socket.io')({upgradeTimeout: 30000});
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

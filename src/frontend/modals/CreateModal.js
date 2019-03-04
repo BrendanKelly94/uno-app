@@ -39,7 +39,7 @@ function CreateModal({ open, setOpen }){
     if(json.hasOwnProperty(err)){
       setError(json.err)
     }else{
-      history.push(`lobby/host/${json.id}`);
+      history.push(`lobby/${json.id}`);
     }
   }
 

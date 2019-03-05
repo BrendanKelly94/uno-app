@@ -35,27 +35,26 @@ function Lobby(){
   }
 
   const confirmLeave = (e) => {
-    console.log('confirmLeave')
     e.preventDefault();
     e.returnValue = ''
   }
 
   const unload = async (e) => {
     e.preventDefault();
-    e.returnValue = '';
+    e.returnValue = ''
     socket.disconnect();
     console.log('unload')
     if(isHost){
       try{
-        const endReq = new ApiEndpoint(`http://localhost:3000/api/game/${gameId}/end/${myId}`);
-        const endData = await endReq.postReq({hasWon:false});
+        const endReq = new ApiEndpoint(`/api/game/${gameId}/end/${myId}`);
+        const endData = await endReq.postReq();
       }catch(e){
         console.log(e);
       }
 
     }else{
       try{
-        const leaveReq = new ApiEndpoint(`http://localhost:3000/api/game/${gameId}/leave/${myId}`);
+        const leaveReq = new ApiEndpoint(`/api/game/${gameId}/leave/${myId}`);
         const leaveData = await leaveReq.postReq({})
       }catch(e){
         console.log(e);
@@ -65,18 +64,14 @@ function Lobby(){
   }
 
 
-
-
-
-  //cdm
-  useEffect( async () => {
+  async function initializeLobby(){
     socket = io('/game',{transports: ['websocket'], upgrade:false})
     socket.emit('join', {gameId: gameId});
 
       try{
-        const joinReq = new ApiEndpoint(`http://localhost:3000/api/game/${gameId}`);
+        const joinReq = new ApiEndpoint(`/api/game/${gameId}`);
         const joinData = await joinReq.postReq({name: login.user_name});
-        const playersData = await new ApiEndpoint(`http://localhost:3000/api/game/${gameId}/players`).getReq();
+        const playersData = await new ApiEndpoint(`/api/game/${gameId}/players`).getReq();
         const index = playersData.players.findIndex((player) => player.user_name === login.user_name);
         setPlayers(playersData.players);
         setIsHost(playersData.players[index].is_host);
@@ -85,6 +80,12 @@ function Lobby(){
         console.log(e)
         setErr(e);
       }
+  }
+
+
+  //cdm
+  useEffect(() => {
+      initializeLobby();
 
       socket.on('start', (data) => {
         socket.disconnect();
@@ -93,7 +94,7 @@ function Lobby(){
 
       socket.on('playerLeft', async (data) => {
         try{
-          const playersData = await new ApiEndpoint(`http://localhost:3000/api/game/${gameId}/players`).getReq();
+          const playersData = await new ApiEndpoint(`/api/game/${gameId}/players`).getReq();
           setPlayers(playersData.players);
         }catch(e){
           console.log(e);
@@ -102,7 +103,7 @@ function Lobby(){
 
       socket.on('newPlayer', async (data) => {
         try{
-          const playersData = await new ApiEndpoint(`http://localhost:3000/api/game/${gameId}/players`).getReq();
+          const playersData = await new ApiEndpoint(`/api/game/${gameId}/players`).getReq();
           setPlayers(playersData.players);
         }catch(e){
           console.log(e);
@@ -140,7 +141,7 @@ function Lobby(){
     const index = players.findIndex((player) => player.user_name === login.user_name)
     if(players[index].is_host){
       try{
-        const startReq = new ApiEndpoint(`http://localhost:3000/api/game/${gameId}/start`);
+        const startReq = new ApiEndpoint(`/api/game/${gameId}/start`);
         const startData = await startReq.postReq({name: login.user_name})
         history.push(`/game/${gameId}`)
       }catch(e){

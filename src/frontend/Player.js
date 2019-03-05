@@ -20,31 +20,35 @@ const Player = ({ tl, pId, playerStatus, translate, rotate, scale, turnId }) => 
     borderRadius: '50%',
     backgroundColor: '#000',
     position: 'absolute',
-    top: '120%',
+    top: '110%',
     left: '50%',
-    transform: 'translate(-50%,0)'
+    transform: 'translate(-50%,0)',
+    zIndex: '100'
   }
-  // const tl = new TimelineLite;
 
-  useEffect(async () => {
+  async function updatePlayerState(){
     try{
       if(pId === playerStatus.id && playerStatus.isAnimating && !playerStatus.isDrawing){
         const topCard = document.getElementById(`player-${pId}-card-0`);
         tl.to(topCard, .5, {rotationY: 180,
             onComplete: async () => {
                 const data = await new ApiEndpoint(`http://localhost:3000/api/getPlayerHandCount/${pId}`).getReq();
+                console.log(cardCount, data.count);
                 setCardCount(data.count);
             }
         });
       }else if(pId === playerStatus.id && (playerStatus.isDrawing || !playerStatus.isAnimating)){
         const data = await new ApiEndpoint(`http://localhost:3000/api/getPlayerHandCount/${pId}`).getReq();
+        console.log(cardCount, data.count);
         setCardCount(data.count);
       }
     }catch(e){
       console.log(e);
     }
+  }
 
-
+  useEffect(() => {
+    updatePlayerState();
   }, [playerStatus])
 
 
@@ -53,12 +57,13 @@ const Player = ({ tl, pId, playerStatus, translate, rotate, scale, turnId }) => 
     <div style = {containerStyle}>
       {
         range.map(i =>
-          <Card cId = {`player-${pId}-card-${(cardCount - 1) - i}`} style = {(i === 0)?{ marginLeft: '0 !important'}:{ marginLeft: '-45px'}}/>
+          <Card cId = {`player-${pId}-card-${(cardCount - 1) - i}`} style = {(i === 0)?{ zIndex: `${i}`, marginLeft: '0 !important'}:{ zIndex: `${i}`, marginLeft: '-45px'}}/>
         )
       }
       {
         (turnId === pId)?
         <div style = {indicatorStyle}>
+          {'*'}
         </div>
         :null
       }

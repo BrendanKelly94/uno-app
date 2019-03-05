@@ -116,10 +116,10 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
     setOptions([])
   }
 
-  useEffect(async () => {
+  async function isMyTurnUpdate(){
     if(isMyTurn && myId !== null){
       try{
-        const optionsData = await new ApiEndpoint(`http://localhost:3000/api/game/${gameId}/getHandOptions/${myId}`).getReq();
+        const optionsData = await new ApiEndpoint(`/api/game/${gameId}/getHandOptions/${myId}`).getReq();
         let selector = optionsData.options.reduce((acc, cur) => {
           return acc += `#hand-${cur.id}, `
         }, '')
@@ -132,34 +132,39 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
         console.log(e);
       }
     }
+  }
+
+  async function hasDrawnUpdate(){
+    if(hasDrawn.status){
+      try{
+        const optionsData = await new ApiEndpoint(`/api/game/${gameId}/getHandOptions/${myId}`).getReq();
+        const os = optionsData.options;
+        console.log(options, os)
+
+        if(os.length > options.length){
+          const drawIndex = os.findIndex((card) => card.id === hasDrawn.card.id);
+          if(os[drawIndex].value === 13 || os[drawIndex].value === 14){
+            setColorChange({status: true, cardId: os[drawIndex].id})
+          }else{
+            submitCardAction({cardId: os[drawIndex].id});
+          }
+        }else{
+          submitCardAction({cardId: -1});
+        }
+
+        setHasDrawn({status: false, card: null});
+      }catch(e){
+        console.log(e);
+      }
+    }
+  }
+
+  useEffect(() => {
+    isMyTurnUpdate();
   }, [isMyTurn]);
 
-  useEffect(async () => {
-      //get options
-      //submitCard based on options
-      if(hasDrawn.status){
-        try{
-          const optionsData = await new ApiEndpoint(`http://localhost:3000/api/game/${gameId}/getHandOptions/${myId}`).getReq();
-          const os = optionsData.options;
-          console.log(options, os)
-
-          if(os.length > options.length){
-            const drawIndex = os.findIndex((card) => card.id === hasDrawn.card.id);
-            if(os[drawIndex].value === 13 || os[drawIndex].value === 14){
-              setColorChange({status: true, cardId: os[drawIndex].id})
-            }else{
-              submitCardAction({cardId: os[drawIndex].id});
-            }
-          }else{
-            submitCardAction({cardId: -1});
-          }
-
-          setHasDrawn({status: false, card: null});
-        }catch(e){
-          console.log(e);
-        }
-      }
-
+  useEffect(() => {
+    hasDrawnUpdate();
   }, [hasDrawn])
 
   return(

@@ -20,8 +20,7 @@ function GamesList(){
     history.push(`lobby/${e.target.id}`);
   }
 
-  //cdm
-  useEffect( async () => {
+  async function initializeList(){
     if(state.isFirst){
       try{
         const res = await fetch('http://localhost:3000/api/games');
@@ -31,6 +30,11 @@ function GamesList(){
         setState({...state, error: e, isFirst: false});
       }
     }
+  }
+
+  //cdm
+  useEffect(() => {
+    initializeList();
   })
 
   const { games, error } = state;

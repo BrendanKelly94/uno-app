@@ -205,7 +205,6 @@ const setCardInPlay = async ({gameId, playerId, cId}) => {
     if(cIP[0].color === 'black'){
       const randomC = colors[Math.floor(Math.random() * colors.length)];
       const changeC = await changeColor({cId: cId, color: randomC});
-      console.log('colorChange', changeC)
     }
     const x = await removeCardInPlay({gameId: gameId});
     return knex('GameCards')

@@ -43,7 +43,6 @@ router.get('/getCardInPlay/:gameId', async (req, res, next) => {
   const gameId = parseInt(req.params['gameId'], 10);
   try{
     const cIP = await queries.getCardInPlay({gameId: gameId});
-    console.log('card in play', cIP)
     res.send({card: cIP[0]});
   }catch(e){
     res.send({error: e});
@@ -346,9 +345,8 @@ async function hasWon({gameId: gameId, playerId: playerId}){
   try{
     const handCount = await queries.getPlayerHandCount({playerId: playerId});
     const player = await queries.getPlayer({playerId: playerId});
-    console.log('hasWon', handCount)
     if(handCount[0].count === '0'){
-      gameIo.to(gameId).emit('playerWon', {user_name: player[0].user_name});
+      gameIo.to(gameId).emit('playerWon', {playerId: player[0].id, user_name: player[0].user_name});
       return true;
     }else{
       return false;
@@ -402,18 +400,13 @@ router.post('/game/:gameId/leave/:playerId' , async (req, res, next) => {
     res.send({err: e});
   }
 });
-//change into function and send event to clients
+
 router.post('/game/:gameId/end/:playerId', async (req, res, next) => {
     const gameId = parseInt(req.params['gameId'], 10);
     const playerId = parseInt(req.params['playerId'], 10);
-    const hasWon = req.body.hasWon;
     try{
       const result = await queries.removeGame({gameId: gameId})
-      if(hasWon){
-        gameIo.to(gameId).emit('gameWon', {playerId: playerId});
-      }else{
-        gameIo.to(gameId).emit('end', {message: "game has ended by host"})
-      }
+      gameIo.to(gameId).emit('end', {message: "game has ended by host"})
       res.send({gameId: result[0]})
     }catch(e){
       res.send({err: e})
@@ -421,9 +414,7 @@ router.post('/game/:gameId/end/:playerId', async (req, res, next) => {
 });
 
 gameIo.on('connection', (socket) => {
-  console.log("hello")
   socket.on('join', (data) => {
-    console.log(data)
     socket.join(data.gameId);
     gameIo.to(data.gameId).emit('joined', { gameId: data.gameId });
   });

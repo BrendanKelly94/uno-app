@@ -1,5 +1,6 @@
+const server = 'http://localhost:3000'
 function ApiEndpoint(uri){
-  this.uri = uri;
+  this.uri = server + uri;
   this.getReq = async () => {
     try{
       const res = await fetch(this.uri);

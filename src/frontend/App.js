@@ -67,19 +67,15 @@ function App() {
 
   async function unload(e){
     console.log('unload')
-    e.preventDefault();
-    e.returnValue = '';
     socket.disconnect();
-    window.removeEventListener('unload', unload);
-    window.removeEventListener('beforeunload', confirmLeave)
     if(isHost){
       try{
         if(isHost){
-          const endReq = new ApiEndpoint(`http://localhost:3000/api/game/${gameId}/end/${myId}`);
-          const endData = await endReq.postReq({hasWon: false});
+          const endReq = new ApiEndpoint(`/api/game/${gameId}/end/${myId}`);
+          const endData = await endReq.postReq();
         }else{
-          const leaveReq = new ApiEndpoint(`http://localhost:3000/api/game/${gameId}/leave/${myId}`);
-          const leaveData = await leaveReq.postReq({})
+          const leaveReq = new ApiEndpoint(`/api/game/${gameId}/leave/${myId}`);
+          const leaveData = await leaveReq.postReq()
         }
       }catch(e){
         console.log(e);
@@ -96,9 +92,9 @@ function App() {
 
   async function submitCard({ cId, color }){
     try{
-      const submitEnd = new ApiEndpoint(`http://localhost:3000/api/game/${gameId}/submitCard/${myId}`);
+      const submitEnd = new ApiEndpoint(`/api/game/${gameId}/submitCard/${myId}`);
       const data = await submitEnd.postReq({cId: cId, color: color});
-      const handData = await new ApiEndpoint(`http://localhost:3000/api/getHand/${myId}`).getReq();
+      const handData = await new ApiEndpoint(`/api/getHand/${myId}`).getReq();
       setHand(handData.hand);
     }catch(e){
       console.log(e);
@@ -107,8 +103,8 @@ function App() {
 
   async function drawCard(){
     try{
-      const drawData = await new ApiEndpoint(`http://localhost:3000/api/game/${gameId}/drawCard/${myId}`).getReq();
-      const handData = await new ApiEndpoint(`http://localhost:3000/api/getHand/${myId}`).getReq();
+      const drawData = await new ApiEndpoint(`/api/game/${gameId}/drawCard/${myId}`).getReq();
+      const handData = await new ApiEndpoint(`/api/getHand/${myId}`).getReq();
 
       setPlayerStatus({id: myId, isAnimating: false, isDrawing: true})
       tl
@@ -127,7 +123,7 @@ function App() {
   async function cardsGiven({playerId, myId}){
     if(playerId === myId){
       try{
-        const handData = await new ApiEndpoint(`http://localhost:3000/api/getHand/${myId}`).getReq();
+        const handData = await new ApiEndpoint(`/api/getHand/${myId}`).getReq();
         setHand(handData.hand);
       }catch(e){
         console.log(e);
@@ -142,20 +138,15 @@ function App() {
     }
   }
 
-  //lifecycle hooks
-
-  //cdm
-  useEffect(async () => {
-    socket = io('/game',{transports: ['websocket'], upgrade: false});
-    socket.emit('join', {gameId: gameId});
+  async function initializeGame(){
     let mId;
       try{
-        const gameData = await new ApiEndpoint(`http://localhost:3000/api/game/${gameId}`).getReq();
-        const playersData = await new ApiEndpoint(`http://localhost:3000/api/getPlayersWithCount/${gameId}`).getReq();
+        const gameData = await new ApiEndpoint(`/api/game/${gameId}`).getReq();
+        const playersData = await new ApiEndpoint(`/api/getPlayersWithCount/${gameId}`).getReq();
         const myI = playersData.players.findIndex((player) => player.user_name === login.user_name);
         mId = playersData.players[myI].id;
-        const handData = await new ApiEndpoint(`http://localhost:3000/api/getHand/${mId}`).getReq();
-        const cIPData = await new ApiEndpoint(`http://localhost:3000/api/getCardInPlay/${gameId}`).getReq();
+        const handData = await new ApiEndpoint(`/api/getHand/${mId}`).getReq();
+        const cIPData = await new ApiEndpoint(`/api/getCardInPlay/${gameId}`).getReq();
         const shift = BuildPlayers({
           players: playersData.players,
           username: login.user_name,
@@ -172,62 +163,75 @@ function App() {
       }catch(e){
         console.log(e);
       }
+  }
 
-      //socket events
-      socket.on('newTurn', async (data) => {
-        console.log(data)
-        try{
-          if(data.newCards.status){
-            await cardsGiven({playerId:data.newCards.id, myId: mId});
-          }
-          if(data.currTurn === mId){
-            const handData = await new ApiEndpoint(`http://localhost:3000/api/getHand/${mId}`).getReq();
-            setTurnId(data.currTurn);
-            setLastTurnId(data.lastTurn);
-            setNewCard((data.card.id === middleCard.id)?{id:-1}: data.card);
-            setHand(handData.hand)
-          }else{
-            if(data.hasDrawn){
-              setPlayerStatus({id: data.lastTurn, isAnimating: false, isDrawing: true})
-            }
-            setTurnId(data.currTurn);
-            setLastTurnId(data.lastTurn);
-            setNewCard((data.card.id === middleCard.id)?{id:-1}: data.card);
+  //lifecycle hooks
 
-          }
-        }catch(e){
-          console.log(e);
-        }
-      });
-
-      socket.on('playerLeft', async (data) => {
-        try{
-          const playersData = await new ApiEndpoint(`http://localhost:3000/api/game/${gameId}/players`);
-          setPlayers(playersData.players);
-          setShiftedPlayers(BuildPlayers({
-            players: playersData.players,
-            username: login.user_name,
-            scaleFactor: scaleFactor
-          }))
-        }catch(e){
-          console.log(e);
-        }
-      });
-
-      socket.on('end', (data) => {
-        setHasEnded(true);
-      });
-
-      socket.on('playerWon', async (data) => {
-        console.log('playerWOn')
-        try{
-          setWonName(data.user_name)
-        }catch(e){
-          console.log(e);
-        }
-      });
-
+  //cdm
+  useEffect(() => {
+      initializeGame();
   },[first])
+
+  useEffect(() => {
+    if(myId !== null){
+        socket = io('/game',{transports: ['websocket'], upgrade: false});
+        socket.emit('join', {gameId: gameId});
+        //socket events
+        socket.on('newTurn', async (data) => {
+          try{
+            if(data.newCards.status){
+              await cardsGiven({playerId:data.newCards.id, myId: myId});
+            }
+            if(data.currTurn === myId){
+              const handData = await new ApiEndpoint(`/api/getHand/${myId}`).getReq();
+              setTurnId(data.currTurn);
+              setLastTurnId(data.lastTurn);
+              setNewCard((data.card.id === middleCard.id)?{id:-1}: data.card);
+              setHand(handData.hand)
+            }else{
+              if(data.hasDrawn){
+                setPlayerStatus({id: data.lastTurn, isAnimating: false, isDrawing: true})
+              }
+              setTurnId(data.currTurn);
+              setLastTurnId(data.lastTurn);
+              setNewCard((data.card.id === middleCard.id)?{id:-1}: data.card);
+            }
+          }catch(e){
+            console.log(e);
+          }
+        });
+
+        socket.on('playerLeft', async (data) => {
+          try{
+            const playersData = await new ApiEndpoint(`/api/game/${gameId}/players`);
+            setPlayers(playersData.players);
+            setShiftedPlayers(BuildPlayers({
+              players: playersData.players,
+              username: login.user_name,
+              scaleFactor: scaleFactor
+            }))
+          }catch(e){
+            console.log(e);
+          }
+        });
+
+        socket.on('end', (data) => {
+          setHasEnded(true);
+        });
+
+        socket.on('playerWon', async (data) => {
+          if(data.playerId === myId){
+            const endReq = new ApiEndpoint(`/api/game/${gameId}/end/${myId}`);
+            const endData = await endReq.postReq();
+          }
+          try{
+            setWonName(data.user_name)
+          }catch(e){
+            console.log(e);
+          }
+        });
+    }
+  },[myId])
 
   //re-render players when scaleFactor changes
   useEffect(() => {

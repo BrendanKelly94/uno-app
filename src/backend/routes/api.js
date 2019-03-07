@@ -91,19 +91,19 @@ router.post('/game/:id', async (req, res, next) => {
     //if so replace a bot with a player
     if(game[0].player_count === 6 && game[0].bot_fill === true){
       const players = await queries.getPlayers({gameId: gameId});
-      let found = false;
+      let found = -1;
       let allbots = true;
       let randomPlayer;
       for(let i = 0; i < 6; i++){
-        randomPlayer = players[Math.floor(Math.random() * players.length)];
-        if(randomPlayer.is_bot){
-          found = true;
+        // randomPlayer = players[Math.floor(Math.random() * players.length)];
+        if(players[i].is_bot){
+          found = i;
         }else{
           allbots = false;
         }
       }
-      if(found){
-        const pId = await queries.replacePlayer({playerId: randomPlayer.id, name: name});
+      if(found !== -1){
+        const pId = await queries.replacePlayer({playerId: players[found].id, name: name});
         gameIo.to(gameId).emit('newPlayer', {id: pId[0]});
         if(allbots){
           const x = await queries.setHost({name: name})
@@ -111,7 +111,7 @@ router.post('/game/:id', async (req, res, next) => {
       }else{        //if no available spot
         res.send({err: 'Game is full'})
       }
-      res.send({id: randomPlayer.id})
+      res.send({id: players[found].id})
 
     }else{
       const playerId = await queries.addPlayer({gameId: gameId, name: name});
@@ -191,6 +191,7 @@ router.post('/game/:id/submitCard/:playerId', async (req, res, next) => {
   const playerId = parseInt(req.params['playerId'], 10);
   const cId = req.body.cId;
   const color = req.body.color;
+  const hasDrawn = req.body.hasDrawn;
   try{
     let nextTurnId, card;
     let newCards = {status: false, id: null}
@@ -209,7 +210,7 @@ router.post('/game/:id/submitCard/:playerId', async (req, res, next) => {
       nextTurnId = await submitCard({gameId: gameId, playerId: playerId, card: card[0]});
     }
     //send next turn event to clients
-    gameIo.to(gameId).emit('newTurn', {currTurn: nextTurnId, lastTurn: playerId, card: card[0], newCards: {status:newCards.status, id: newCards.id}, hasDrawn: false});
+    gameIo.to(gameId).emit('newTurn', {currTurn: nextTurnId, lastTurn: playerId, card: card[0], newCards: {status:newCards.status, id: newCards.id}, hasDrawn: hasDrawn?true:false});
 
     const playerWon = await hasWon({gameId: gameId, playerId: playerId})
     const nextPlayer = await queries.getPlayer({playerId: nextTurnId});

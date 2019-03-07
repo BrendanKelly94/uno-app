@@ -8,8 +8,6 @@ router.post('/', async (req, res, next) => {
   const name = req.body.name;
   const inputPwd = req.body.pwd;
 
-  if(!name || !inputPwd) res.json({err: 'username or password incorrect'});
-
   if(name !== 'bot'){
     const databasePwd = await queries.findUser({name: name});
     if(databasePwd.length < 1){

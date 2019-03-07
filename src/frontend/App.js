@@ -65,10 +65,8 @@ function App() {
 
   //functions
 
-  async function unload(e){
+  async function leave(e){
     console.log('unload')
-    socket.disconnect();
-    if(isHost){
       try{
         if(isHost){
           const endReq = new ApiEndpoint(`/api/game/${gameId}/end/${myId}`);
@@ -80,20 +78,13 @@ function App() {
       }catch(e){
         console.log(e);
       }
-    }
 
   }
 
-  function confirmLeave(e){
-    console.log('confirmLeave')
-    e.preventDefault();
-    e.returnValue = ''
-  }
-
-  async function submitCard({ cId, color }){
+  async function submitCard({ cId, color, hasDrawn }){
     try{
       const submitEnd = new ApiEndpoint(`/api/game/${gameId}/submitCard/${myId}`);
-      const data = await submitEnd.postReq({cId: cId, color: color});
+      const data = await submitEnd.postReq({cId: cId, color: color, hasDrawn: hasDrawn});
       const handData = await new ApiEndpoint(`/api/getHand/${myId}`).getReq();
       setHand(handData.hand);
     }catch(e){
@@ -203,7 +194,7 @@ function App() {
 
         socket.on('playerLeft', async (data) => {
           try{
-            const playersData = await new ApiEndpoint(`/api/game/${gameId}/players`);
+            const playersData = await new ApiEndpoint(`/api/getPlayersWithCount/${gameId}`).getReq();
             setPlayers(playersData.players);
             setShiftedPlayers(BuildPlayers({
               players: playersData.players,
@@ -216,14 +207,11 @@ function App() {
         });
 
         socket.on('end', (data) => {
+          console.log(data)
           setHasEnded(true);
         });
 
         socket.on('playerWon', async (data) => {
-          if(data.playerId === myId){
-            const endReq = new ApiEndpoint(`/api/game/${gameId}/end/${myId}`);
-            const endData = await endReq.postReq();
-          }
           try{
             setWonName(data.user_name)
           }catch(e){
@@ -280,12 +268,10 @@ function App() {
 
   useEffect( () => {
     if(myId !== null){
-      window.addEventListener('unload', unload)
-      window.addEventListener('beforeunload', confirmLeave)
+      window.addEventListener('beforeunload', leave)
     }
     return(() => {
-      window.removeEventListener('unload', unload);
-      window.removeEventListener('beforeunload', confirmLeave)
+      window.removeEventListener('beforeunload', leave)
     })
   }, [myId])
 
@@ -300,6 +286,7 @@ function App() {
   useEffect(() => {
     if(wonName !== null){
       setTimeout(() => {
+        leave();
         history.push('/gamesList');
       }, 2000)
     }
@@ -314,6 +301,7 @@ function App() {
             <Player
               key = {`player-${player.id}`}
               tl = {tl}
+              uName = {player.user_name}
               pId = {player.id}
               turnId = {turnId}
               playerStatus = {playerStatus}

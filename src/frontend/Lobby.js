@@ -34,20 +34,14 @@ function Lobby(){
     fontSize: '2em'
   }
 
-  const confirmLeave = (e) => {
-    e.preventDefault();
-    e.returnValue = ''
-  }
 
-  const unload = async (e) => {
-    e.preventDefault();
-    e.returnValue = ''
-    socket.disconnect();
-    console.log('unload')
+  const leave = async (e) => {
+
     if(isHost){
+
       try{
         const endReq = new ApiEndpoint(`/api/game/${gameId}/end/${myId}`);
-        const endData = await endReq.postReq();
+        const endData = await endReq.postReq({});
       }catch(e){
         console.log(e);
       }
@@ -73,6 +67,7 @@ function Lobby(){
         const joinData = await joinReq.postReq({name: login.user_name});
         const playersData = await new ApiEndpoint(`/api/game/${gameId}/players`).getReq();
         const index = playersData.players.findIndex((player) => player.user_name === login.user_name);
+        console.log(index, playersData.players)
         setPlayers(playersData.players);
         setIsHost(playersData.players[index].is_host);
         setMyId(playersData.players[index].id);
@@ -120,12 +115,10 @@ function Lobby(){
 
   useEffect( () => {
     if(myId !== null){
-      window.addEventListener('unload', unload)
-      window.addEventListener('beforeunload', confirmLeave)
+      window.addEventListener('beforeunload', leave)
     }
     return(() => {
-      window.removeEventListener('unload', unload);
-      window.removeEventListener('beforeunload', confirmLeave)
+      window.removeEventListener('beforeunload', leave)
     })
   }, [myId])
 

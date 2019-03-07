@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Modal from '@material-ui/core/Modal';
 import Button from '@material-ui/core/Button'
 import TextField from '@material-ui/core/TextField';
-
+import ApiEndpoint from '../utils/ApiEndpoint.js';
 
 function AuthModal({ open , setOpen, login }){
   const [ auth, setAuth ] = useState({name: '', pwd: '', rePwd: ''});
@@ -47,23 +47,16 @@ function AuthModal({ open , setOpen, login }){
 
   const handleLogin = async () => {
     try{
-      const res = await fetch('http://localhost:3000/login', {
-          method: "POST",
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({name: auth.name, pwd: auth.pwd})
-        });
-      const json = await res.json();
-      if(json.hasOwnProperty('name')){
+
+      const loginData = await new ApiEndpoint('/login').postReq({name: auth.name, pwd: auth.pwd})
+      if(loginData.hasOwnProperty('name')){
         setStatus({err: null, success: true})
         setTimeout(() => {
           setOpen(false);
         }, 500)
         login(auth.name, auth.pwd)
       }else{
-        setStatus({err: json.err})
+        setStatus({err: loginData.err})
       }
     }catch(e){
       setStatus({err: e})
@@ -75,20 +68,13 @@ function AuthModal({ open , setOpen, login }){
       setErr('passwords do not match')
     }
     try{
-      const res = await fetch('http://localhost:3000/register', {
-        method: "POST",
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({name: auth.name, pwd: auth.pwd})
-      });
-      const json = await res.json();
-      if(json.hasOwnProperty('name')){
+
+      const regData = await new ApiEndpoint('/register').postReq({name: auth.name, pwd: auth.pwd});
+      if(regData.hasOwnProperty('name')){
         setStatus({err: null, success: true});
         login(auth.name, auth.pwd)
       }else{
-        setStatus({...status, err: json.err});
+        setStatus({...status, err: regData.err});
       }
     }catch(e){
       setStatus({...status, err: e});

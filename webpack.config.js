@@ -17,7 +17,21 @@ module.exports = {
         use: [{
           loader: "babel-loader",
           options: {
-            presets: ['@babel/react']
+            presets: ['@babel/react',
+              [ "@babel/env", {
+                "targets": {
+                  "browsers": [ "last 2 versions" ]
+                },
+                //exclude: [ 'transform-regenerator' ],
+                "modules": false
+              }]
+            ],
+            "plugins": [
+                ["@babel/plugin-transform-runtime",
+                {
+                    "regenerator": true
+                }]
+            ]
           }
         }]
       },
@@ -30,6 +44,7 @@ module.exports = {
         ]
       }
     ]
+
   }
 
 };

@@ -84,10 +84,10 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
     const eId = e.target.id;
     const color = eId.split('-')[1];
     setColorChange({status: false, cardId: null})
-    submitCardAction({cardId: colorChange.cardId, color: color})
+    submitCardAction({cardId: colorChange.cardId, color: color, hasDrawn: hasDrawn.status})
   }
 
-  function submitCardAction({cardId, color}){
+  function submitCardAction({cardId, color, hasDrawn}){
     if(cardId !== -1 && (isMyTurn && myId !== null)){
       const cI = hand.findIndex((card) => card.id === cardId);
       const source = document.getElementById(`hand-${cardId}`)
@@ -103,17 +103,19 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
       tl
       .to(source, .5, {x: translate.x/scaleFactor, y: translate.y/scaleFactor, rotation: variance, scale: 1.2,
         onComplete: () => {
-          submitCard({cId: cardId, color: color, variance: variance})
+          submitCard({cId: cardId, color: color, hasDrawn})
         }
       })
       .to('.hand-card', .2, {})
       .to('.hand-card', .5, {yPercent: 0})
     }else{
-      submitCard({cId: cardId});
+      submitCard({cId: cardId, hasDrawn: true});
       tl
       .to('.hand-card', .5, {yPercent: 0})
     }
-    setOptions([])
+    setOptions([]);
+    setHasDrawn({status: false, card: null});
+
   }
 
   async function isMyTurnUpdate(){
@@ -139,20 +141,18 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
       try{
         const optionsData = await new ApiEndpoint(`/api/game/${gameId}/getHandOptions/${myId}`).getReq();
         const os = optionsData.options;
-        console.log(options, os)
 
         if(os.length > options.length){
           const drawIndex = os.findIndex((card) => card.id === hasDrawn.card.id);
           if(os[drawIndex].value === 13 || os[drawIndex].value === 14){
             setColorChange({status: true, cardId: os[drawIndex].id})
           }else{
-            submitCardAction({cardId: os[drawIndex].id});
+            submitCardAction({cardId: os[drawIndex].id, hasDrawn: true});
           }
         }else{
           submitCardAction({cardId: -1});
         }
 
-        setHasDrawn({status: false, card: null});
       }catch(e){
         console.log(e);
       }

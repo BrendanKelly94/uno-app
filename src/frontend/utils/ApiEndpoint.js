@@ -20,6 +20,8 @@ function ApiEndpoint(uri){
           },
           body: JSON.stringify(json)
       })
+      const rJson = await res.json();
+      return rJson;
     }catch(e){
       throw new Error(e);
     }

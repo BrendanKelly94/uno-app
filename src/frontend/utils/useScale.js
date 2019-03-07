@@ -5,9 +5,9 @@ function useScale(){
 
   function getScale(){
     if(window.innerWidth < 500){
-      return {x: .48, y: .4, size: 1}
+      return {x: .48, y: .48, size: 1}
     }else if(window.innerWidth < 768){
-      return {x: .45, y: .4, size: 1.1};
+      return {x: .45, y: .45, size: 1.1};
     }else if(window.innerWidth < 992 ){
       return {x: .4, y: .4, size: 1.2};
     }else{

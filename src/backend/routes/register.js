@@ -9,6 +9,10 @@ router.post('/', (req, res, next) => {
   const name = req.body.name;
   const pwd = req.body.pwd;
 
+  if(pwd.length < 1){
+    res.json({err: 'Password cannot be empty'})
+  }
+
   if(name !== 'bot'){
     bcrypt.hash(pwd, 1, async (err, hash) => {
       try{

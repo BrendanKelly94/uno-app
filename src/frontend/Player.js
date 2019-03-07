@@ -3,8 +3,9 @@ import { TweenLite, TimelineLite } from 'gsap';
 import ApiEndpoint from './utils/ApiEndpoint.js';
 import Card from './Card'
 
-const Player = ({ tl, pId, playerStatus, translate, rotate, scale, turnId }) => {
+const Player = ({ tl, pId, uName, playerStatus, translate, rotate, scale, turnId }) => {
   const [ cardCount, setCardCount ] = useState(7);
+  const [ isMyTurn, setIsMyTurn ] = useState(false);
   const containerStyle = {
     display: 'flex',
     justifyContent: 'center',
@@ -26,19 +27,31 @@ const Player = ({ tl, pId, playerStatus, translate, rotate, scale, turnId }) => 
     zIndex: '100'
   }
 
+  const nameStyle = {
+    position: 'absolute',
+    backgroundColor: '#000',
+    color: '#fff',
+    paddingLeft: '5%',
+    paddingRight: '5%',
+    top: '120%',
+    left: '50%',
+    transform: `translate(-50%, 0) rotate(${-rotate}deg)`,
+    zIndex: '100'
+  }
+
   async function updatePlayerState(){
     try{
       if(pId === playerStatus.id && playerStatus.isAnimating && !playerStatus.isDrawing){
         const topCard = document.getElementById(`player-${pId}-card-0`);
         tl.to(topCard, .5, {rotationY: 180,
             onComplete: async () => {
-                const data = await new ApiEndpoint(`http://localhost:3000/api/getPlayerHandCount/${pId}`).getReq();
+                const data = await new ApiEndpoint(`/api/getPlayerHandCount/${pId}`).getReq();
                 console.log(cardCount, data.count);
                 setCardCount(data.count);
             }
         });
       }else if(pId === playerStatus.id && (playerStatus.isDrawing || !playerStatus.isAnimating)){
-        const data = await new ApiEndpoint(`http://localhost:3000/api/getPlayerHandCount/${pId}`).getReq();
+        const data = await new ApiEndpoint(`/api/getPlayerHandCount/${pId}`).getReq();
         console.log(cardCount, data.count);
         setCardCount(data.count);
       }
@@ -51,23 +64,39 @@ const Player = ({ tl, pId, playerStatus, translate, rotate, scale, turnId }) => 
     updatePlayerState();
   }, [playerStatus])
 
+  useEffect(() => {
+    if(turnId === pId){
+      setIsMyTurn(true);
+    }else{
+      if(isMyTurn){
+        setIsMyTurn(false);
+      }
+    }
+  }, [turnId])
+
+  useEffect(() => {
+    if(isMyTurn){
+      tl.to(`#player-${pId}-name`, .2, {color: 'yellow'})
+    }else{
+      tl.to(`#player-${pId}-name`, .2, {color: '#fff'})
+    }
+
+  }, [isMyTurn])
+
 
   const range = [...Array(cardCount)].map((_, i) => i);
   return(
+    <React.Fragment>
+
     <div style = {containerStyle}>
+      <div id = {`player-${pId}-name`} style = {nameStyle} >{uName}</div>
       {
         range.map(i =>
           <Card cId = {`player-${pId}-card-${(cardCount - 1) - i}`} style = {(i === 0)?{ zIndex: `${i}`, marginLeft: '0 !important'}:{ zIndex: `${i}`, marginLeft: '-45px'}}/>
         )
       }
-      {
-        (turnId === pId)?
-        <div style = {indicatorStyle}>
-          {'*'}
-        </div>
-        :null
-      }
     </div>
+    </React.Fragment>
     //chat bubble will go here
   );
 }

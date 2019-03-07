@@ -1,9 +1,16 @@
-# uno-api
+This full stack application is a multiplayer uno game built using React (Hooks) + Node/Express. I first developed the API and the test suite for the API to ensure it would be functioning before UI development. After completing this part fairly quickly I spent some time designing and prototyping the Front End. This proved time consuming because of the unique component structure this app required. At this moment, the Front End isn't complete however the game is in a very basic working state.
 
-This project is an API for mulitplayer UNO that will be utilized by a future front-end application. When starting this project, I wanted to fully commit to BDD methodologies. Before anything was implemented in the API, tests were written describing the behavior of the application. Once I made these tests fail, I implemented the corresponding end-point and refactored until I reached a green state. I repeated this process until my entire test suite successfully passed. This style of developing forces you test earlier and more often. This reduces the amount of bugs and also the time it takes to find them.
+TODO:
+* Host on Heroku
+* UI styling
+* Chat
+* Refactoring of certain components
+* Front End test suite
 
-This API was built using:
+This App was made with:
 
+* React Hooks
+* GSAP (Animations)
 * Node + Express
 * Async/Await (cleaner async code)
 * SocketIO (communication between server and clients)

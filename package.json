@@ -1,11 +1,12 @@
 {
   "name": "new-uno",
-  "version": "0.0.0",
+  "version": "10.10.0",
   "private": true,
   "scripts": {
-    "start": "nodemon ./src/backend/bin/www",
+    "start": "node ./src/backend/bin/www",
     "watch": "webpack --watch",
-    "test": "mocha"
+    "test": "mocha",
+    "heroku-postbuild": "webpack"
   },
   "dependencies": {
     "@material-ui/core": "^3.5.1",

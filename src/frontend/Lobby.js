@@ -67,7 +67,6 @@ function Lobby(){
         const joinData = await joinReq.postReq({name: login.user_name});
         const playersData = await new ApiEndpoint(`/api/game/${gameId}/players`).getReq();
         const index = playersData.players.findIndex((player) => player.user_name === login.user_name);
-        console.log(index, playersData.players)
         setPlayers(playersData.players);
         setIsHost(playersData.players[index].is_host);
         setMyId(playersData.players[index].id);

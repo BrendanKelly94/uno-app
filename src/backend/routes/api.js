@@ -210,7 +210,7 @@ router.post('/game/:id/submitCard/:playerId', async (req, res, next) => {
       nextTurnId = await submitCard({gameId: gameId, playerId: playerId, card: card[0]});
     }
     //send next turn event to clients
-    gameIo.to(gameId).emit('newTurn', {currTurn: nextTurnId, lastTurn: playerId, card: card[0], newCards: {status:newCards.status, id: newCards.id}, hasDrawn: hasDrawn?true:false});
+    gameIo.to(gameId).emit('newTurn', {currTurn: nextTurnId, lastTurn: playerId, card: card[0], newCards: {status:newCards.status, id: newCards.id}});
 
     const playerWon = await hasWon({gameId: gameId, playerId: playerId})
     const nextPlayer = await queries.getPlayer({playerId: nextTurnId});

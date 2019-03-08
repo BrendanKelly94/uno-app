@@ -42,17 +42,16 @@ const Player = ({ tl, pId, uName, playerStatus, translate, rotate, scale, turnId
   async function updatePlayerState(){
     try{
       if(pId === playerStatus.id && playerStatus.isAnimating && !playerStatus.isDrawing){
+        const data = await new ApiEndpoint(`/api/getPlayerHandCount/${pId}`).getReq();
         const topCard = document.getElementById(`player-${pId}-card-0`);
         tl.to(topCard, .5, {rotationY: 180,
-            onComplete: async () => {
-                const data = await new ApiEndpoint(`/api/getPlayerHandCount/${pId}`).getReq();
-                console.log(cardCount, data.count);
+            onComplete: () => {
                 setCardCount(data.count);
             }
         });
+
       }else if(pId === playerStatus.id && (playerStatus.isDrawing || !playerStatus.isAnimating)){
         const data = await new ApiEndpoint(`/api/getPlayerHandCount/${pId}`).getReq();
-        console.log(cardCount, data.count);
         setCardCount(data.count);
       }
     }catch(e){

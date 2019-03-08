@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { TweenLite, TimelineLite } from 'gsap';
+import { TweenLite, TimelineLite, TimelineMax } from 'gsap';
 import gameStoreContext from './context/gameStoreContext';
 import authStoreContext from './context/authStoreContext';
 import useScale from './utils/useScale';
@@ -37,7 +37,7 @@ function App() {
   const gameId = location[location.length - 1];
   let socket;
 
-  const tl = new TimelineLite;
+  const tl = new TimelineMax;
 
   const middleStyle = {
     display: 'flex',
@@ -66,7 +66,6 @@ function App() {
   //functions
 
   async function leave(e){
-    console.log('unload')
       try{
         if(isHost){
           const endReq = new ApiEndpoint(`/api/game/${gameId}/end/${myId}`);
@@ -102,6 +101,7 @@ function App() {
       .to('#draw-card', .5, {
         onComplete: () => {
           setHand(handData.hand)
+          setPlayerStatus({id: null, isAnimating: false, isDrawing: false})
         }
       })
 
@@ -169,6 +169,7 @@ function App() {
         socket.emit('join', {gameId: gameId});
         //socket events
         socket.on('newTurn', async (data) => {
+          console.log(data)
           try{
             if(data.newCards.status){
               await cardsGiven({playerId:data.newCards.id, myId: myId});
@@ -207,7 +208,6 @@ function App() {
         });
 
         socket.on('end', (data) => {
-          console.log(data)
           setHasEnded(true);
         });
 
@@ -244,7 +244,7 @@ function App() {
       const variance = Math.random() * (5 - (-5)) + (-5);
 
       tl
-      .to(source, 0, {x: initTransform.x, y: initTransform.y, rotation: initTransform.rotate, scale: scaleFactor.size,
+      .to(source, 0.0001, {x: initTransform.x, y: initTransform.y, rotation: initTransform.rotate, scale: scaleFactor.size,
         onComplete: () => {
           setPlayerStatus({id: lastTurnId, isAnimating: true, isDrawing: false});
         }
@@ -256,7 +256,7 @@ function App() {
           setPlayerStatus({id: null, isAnimating: false, isDrawing: false})
         }
       })
-      .to(source, 0, {opacity: 0})
+      .to(source, 0.0001, {opacity: 0})
     }else if(newCard.id !== -1 && lastTurnId === myId){
       setMiddleCard(newCard);
     }else if(newCard.id === -1){

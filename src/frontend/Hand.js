@@ -83,8 +83,8 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
   function handleColorChange(e){
     const eId = e.target.id;
     const color = eId.split('-')[1];
-    setColorChange({status: false, cardId: null})
     submitCardAction({cardId: colorChange.cardId, color: color, hasDrawn: hasDrawn.status})
+    setColorChange({status: false, cardId: null})
   }
 
   function submitCardAction({cardId, color, hasDrawn}){

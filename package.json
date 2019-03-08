@@ -6,7 +6,7 @@
     "start": "node ./src/backend/bin/www",
     "watch": "webpack --watch",
     "test": "mocha",
-    "heroku-postbuild": "npm start && webpack"
+    "heroku-postbuild": "webpack"
   },
   "dependencies": {
     "@material-ui/core": "^3.5.1",

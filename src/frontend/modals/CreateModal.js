@@ -27,19 +27,13 @@ function CreateModal({ open, setOpen }){
 
 
   const handleCreate = async () => {
-    const res = await fetch('http://localhost:3000/api/newGame', {
-        method: "POST",
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({botFill: fillBots})
-    })
-    const json = await res.json();
-    if(json.hasOwnProperty(err)){
-      setError(json.err)
+    const newGameData = await new ApiEndpoint('/api/newGame').postReq(
+      {botFill: fillBots};
+    )
+    if(newGameData.hasOwnProperty(err)){
+      setError(newGameData.err)
     }else{
-      history.push(`lobby/${json.id}`);
+      history.push(`lobby/${newGameData.id}`);
     }
   }
 

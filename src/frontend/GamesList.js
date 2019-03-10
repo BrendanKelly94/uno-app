@@ -23,9 +23,8 @@ function GamesList(){
   async function initializeList(){
     if(state.isFirst){
       try{
-        const res = await fetch('http://localhost:3000/api/games');
-        const json = await res.json();
-        setState({...state, games: json.games, isFirst: false});
+        const gamesData = await new ApiEndpoint('/api/games').getReq();
+        setState({...state, games: gamesData.games, isFirst: false});
       }catch(e){
         setState({...state, error: e, isFirst: false});
       }

@@ -1,4 +1,3 @@
-// const server = 'http://localhost:3000'
 function ApiEndpoint(uri){
   this.uri = uri;
   this.getReq = async () => {

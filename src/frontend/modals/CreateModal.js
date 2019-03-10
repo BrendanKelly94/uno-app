@@ -28,7 +28,7 @@ function CreateModal({ open, setOpen }){
 
   const handleCreate = async () => {
     const newGameData = await new ApiEndpoint('/api/newGame').postReq(
-      {botFill: fillBots};
+      {botFill: fillBots}
     )
     if(newGameData.hasOwnProperty(err)){
       setError(newGameData.err)

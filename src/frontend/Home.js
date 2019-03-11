@@ -41,10 +41,12 @@ function Home(){
   }
 
   const handleCreate = () => {
-    if(context.user_name){
-      setCreate(!create);
+    const newGameData = await new ApiEndpoint('/api/newGame').postReq({botFill: fillBots})
+    if(newGameData.hasOwnProperty(err)){
+      // setError(newGameData.err)
+      console.log(err)
     }else{
-      setAuth(!auth);
+      history.push(`lobby/${newGameData.id}`);
     }
   }
 

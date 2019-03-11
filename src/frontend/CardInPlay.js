@@ -5,7 +5,7 @@ import FindInitTransform from './utils/FindInitTransform';
 
 function CardInPlay({ card }){
   const [ backgroundCards, setBackgroundCards ] = useState([]);
-  const [ lastVar, setLastVar ] = useState(card.variance);
+  const [ lastVar, setLastVar ] = useState(0);
   const [ isFirst, setIsFirst ] = useState(true);
   const containerStyle = {
     width: '50px'

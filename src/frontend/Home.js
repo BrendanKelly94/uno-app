@@ -42,13 +42,17 @@ function Home(){
   }
 
   const handleCreate = async () => {
-    const newGameData = await new ApiEndpoint('/api/newGame').postReq({botFill: true})
-    console.log(newGameData)
-    if(newGameData.hasOwnProperty('err')){
-      // setError(newGameData.err)
-      console.log('err')
+    if(context.user_name){
+      setAuth(!auth);
     }else{
-      history.push(`lobby/${newGameData.id}`);
+      const newGameData = await new ApiEndpoint('/api/newGame').postReq({botFill: true})
+      console.log(newGameData)
+      if(newGameData.hasOwnProperty('err')){
+        // setError(newGameData.err)
+        console.log('err')
+      }else{
+        history.push(`lobby/${newGameData.id}`);
+      }
     }
   }
 

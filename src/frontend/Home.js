@@ -43,6 +43,7 @@ function Home(){
 
   const handleCreate = async () => {
     const newGameData = await new ApiEndpoint('/api/newGame').postReq({botFill: true})
+    console.log(newGameData)
     if(newGameData.hasOwnProperty('err')){
       // setError(newGameData.err)
       console.log('err')

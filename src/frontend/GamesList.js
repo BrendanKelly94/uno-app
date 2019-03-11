@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import history from './utils/history.js';
+import ApiEndpoint from './utils/ApiEndpoint.js'
 
 function GamesList(){
   const [ state, setState ] = useState({

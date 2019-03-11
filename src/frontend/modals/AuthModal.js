@@ -72,6 +72,9 @@ function AuthModal({ open , setOpen, login }){
       const regData = await new ApiEndpoint('/register').postReq({name: auth.name, pwd: auth.pwd});
       if(regData.hasOwnProperty('name')){
         setStatus({err: null, success: true});
+        setTimeout(() => {
+          setOpen(false);
+        }, 500)
         login(auth.name, auth.pwd)
       }else{
         setStatus({...status, err: regData.err});

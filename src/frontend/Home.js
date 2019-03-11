@@ -40,7 +40,7 @@ function Home(){
     }
   }
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     const newGameData = await new ApiEndpoint('/api/newGame').postReq({botFill: fillBots})
     if(newGameData.hasOwnProperty(err)){
       // setError(newGameData.err)

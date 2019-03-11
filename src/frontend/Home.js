@@ -3,6 +3,7 @@ import AuthModal from './modals/AuthModal';
 import CreateModal from './modals/CreateModal';
 import authStoreContext from './context/authStoreContext';
 import history from './utils/history.js';
+import ApiEndpoint from './utils/ApiEndpoint.js';
 
 function Home(){
   const [auth, setAuth] = useState(false);

@@ -42,7 +42,7 @@ function Home(){
   }
 
   const handleCreate = async () => {
-    if(context.user_name){
+    if(!context.user_name){
       setAuth(!auth);
     }else{
       const newGameData = await new ApiEndpoint('/api/newGame').postReq({botFill: true})

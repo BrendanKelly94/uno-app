@@ -102,8 +102,8 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
 
       tl
       .to(source, .5, {x: translate.x/scaleFactor, y: translate.y/scaleFactor, rotation: variance, scale: 1.2,
-        onComplete: () => {
-          submitCard({cId: cardId, color: color, hasDrawn})
+        onComplete: async () => {
+          await submitCard({cId: cardId, color: color, hasDrawn})
         }
       })
       .to('.hand-card', .5, {yPercent: 0})

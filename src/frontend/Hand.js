@@ -106,6 +106,7 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
           await submitCard({cId: cardId, color: color, hasDrawn})
         }
       })
+      .to('.hand-card', .3, {onComplete: () => true})
       .to('.hand-card', .5, {yPercent: 0})
     }else{
       submitCard({cId: cardId, hasDrawn: true});

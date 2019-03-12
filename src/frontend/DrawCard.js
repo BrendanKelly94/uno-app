@@ -22,7 +22,7 @@ const DrawCard = React.memo(({ tl, playerStatus, myId, scaleFactor, isMyTurn}) =
       tl
       .to(source, .5, {x: transform.x/scaleFactor, y: transform.y/scaleFactor, scale: .8})
       .to(source, .4, {opacity: 0}, '-=.4')
-      .to(source, 0.0001, {x: 0, y:0, scale: 1, opacity: 1})
+      .set(source, {x: 0, y:0, scale: 1, opacity: 1})
 
 
     }else{

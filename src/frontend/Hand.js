@@ -102,16 +102,12 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
 
       tl
       .to(source, .5, {x: translate.x/scaleFactor, y: translate.y/scaleFactor, rotation: variance, scale: 1.2,
-        onComplete: async () => {
-          await submitCard({cId: cardId, color: color, hasDrawn})
+        onComplete: () => {
+          submitCard({cId: cardId, color: color, hasDrawn})
         }
       })
-      .to('.hand-card', .3, {onComplete: () => true})
-      .to('.hand-card', .5, {yPercent: 0})
     }else{
       submitCard({cId: cardId, hasDrawn: true});
-      tl
-      .to('.hand-card', .5, {yPercent: 0})
     }
     setOptions([]);
     setHasDrawn({status: false, card: null});
@@ -166,6 +162,10 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
   useEffect(() => {
     hasDrawnUpdate();
   }, [hasDrawn])
+
+  useEffect(() => {
+    tl.to('.hand-card', .5, {yPercent: 0})
+  }, [hand])
 
   return(
     <React.Fragment>

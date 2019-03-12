@@ -169,7 +169,6 @@ function App() {
         socket.emit('join', {gameId: gameId});
         //socket events
         socket.on('newTurn', async (data) => {
-          console.log(data)
           try{
             if(data.newCards.status){
               await cardsGiven({playerId:data.newCards.id, myId: myId});
@@ -244,7 +243,7 @@ function App() {
       const variance = Math.random() * (5 - (-5)) + (-5);
 
       tl
-      .to(source, 0.0001, {x: initTransform.x, y: initTransform.y, rotation: initTransform.rotate, scale: scaleFactor.size,
+      .set(source, {x: initTransform.x, y: initTransform.y, rotation: initTransform.rotate, scale: scaleFactor.size,
         onComplete: () => {
           setPlayerStatus({id: lastTurnId, isAnimating: true, isDrawing: false});
         }
@@ -256,7 +255,7 @@ function App() {
           setPlayerStatus({id: null, isAnimating: false, isDrawing: false})
         }
       })
-      .to(source, 0.0001, {opacity: 0})
+      .set(source, {opacity: 0})
     }else if(newCard.id !== -1 && lastTurnId === myId){
       setMiddleCard(newCard);
     }else if(newCard.id === -1){

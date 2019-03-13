@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import history from './utils/history.js';
 import ApiEndpoint from './utils/ApiEndpoint.js'
+import Button from '@material-ui/core/Button';
+
 
 function GamesList(){
   const [ state, setState ] = useState({
@@ -10,16 +12,27 @@ function GamesList(){
   })
 
   const h1Style = {
-    position: 'absolute',
-    left: '50%',
-    top: '10%',
-    transform: 'translate(-50%, 0)'
+    textAlign: 'center',
+    marginBottom: '2em',
+    marginTop: '2em'
   }
 
   const buttonStyle = {
     position: 'absolute',
     left: '1em',
-    top: '1em'
+    top: '1em',
+    zIndex: 1
+  }
+
+  const baseContainerStyle = {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    left: '50%',
+    transform: 'translate(-50%,0)',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center'
   }
 
   const gameListingStyle = {
@@ -32,12 +45,8 @@ function GamesList(){
   const listContainerStyle = {
     display: 'flex',
     flexDirection: 'column',
-    position: 'absolute',
     width: '60%',
     height: '50%',
-    left: '50%',
-    top: '40%',
-    transform: 'translate(-50%,-40%)',
     overflowY: 'scroll'
   }
 
@@ -67,33 +76,33 @@ function GamesList(){
 
   const { games, error } = state;
   return(
-    <div>
-      <button style = {buttonStyle} onClick = {navigateBack}> Back </button>
-      <h1 style = {h1Style}>Available Games</h1>
-      <div style = {listContainerStyle}>
-        <div style = {gameListingStyle}>
-          <h4>id</h4>
-          <h4>Bots</h4>
-          <h4>#players</h4>
-          <h4></h4>
-        </div>
-        {
-        !error && games.map(game =>
+    <React.Fragment>
+      <Button style = {buttonStyle} onClick = {navigateBack} variant = "outlined" color = "secondary"> Back </Button>
+      <div style = {baseContainerStyle}>
+        <h1 style = {h1Style}>Available Games</h1>
+        <div style = {listContainerStyle}>
           <div style = {gameListingStyle}>
-            <div>{game.id}</div>
-            <div>{game.bot_fill?'Yes':'No'}</div>
-            <div>{game.player_count}/6</div>
-            <button id = {game.id} onClick = {handleJoin}>Join</button>
+            <h4>id</h4>
+            <h4>Bots</h4>
+            <h4>#players</h4>
+            <h4></h4>
           </div>
-        )
-        }
+          {
+          games.map(game =>
+            <div style = {gameListingStyle}>
+              <div>{game.id}</div>
+              <div>{game.bot_fill?'Yes':'No'}</div>
+              <div>{game.player_count}/6</div>
+              <Button id = {game.id} onClick = {handleJoin} variant = "contained" color = "primary">Join</Button>
+            </div>
+          )
+          }
+        </div>
       </div>
-
-    {
-      error && <div> {error} </div>
-    }
-
-    </div>
+      {
+        error && <div> {error} </div>
+      }
+    </React.Fragment>
   );
 }
 

@@ -33,6 +33,7 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
       transform: 'translate(-50%, -50%)',
       display: 'flex',
       justifyContent: 'center',
+      alignItems: 'center',
       backgroundColor: 'grey'
   }
 

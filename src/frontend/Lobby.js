@@ -7,16 +7,16 @@ import io from 'socket.io-client';
 
 function Lobby(){
   const [ login, setLogin ] = useContext(authStoreContext);
-  const [players, setPlayers] = useState([]);
-  const [isFirst, setIsFirst] = useState(true);
-  const [error, setError] = useState(null);
-  const [hasEnded, setHasEnded] = useState(false);
-  const [isHost, setIsHost] = useState(false);
-  const [myId, setMyId] = useState(null);
+  const [ players, setPlayers ] = useState([]);
+  const [ isFirst, setIsFirst ] = useState(true);
+  const [ error, setError ] = useState(null);
+  const [ hasEnded, setHasEnded ] = useState(false);
+  const [ isHost, setIsHost ] = useState(false);
+  const [ myId, setMyId ] = useState(null);
 
   const location = history.location.pathname.split('/');
   const gId = parseInt(location[location.length - 1], 10)
-  const [gameId, setGameId] = useState(gId);
+  const [ gameId, setGameId ] = useState(gId);
   let socket;
   const first = null;
 
@@ -26,13 +26,20 @@ function Lobby(){
     left: '1em'
   }
 
-  const containerStyle = {
+  const baseContainerStyle = {
+    position: 'absolute',
+    height: '100%',
+    left: '50%',
+    transform: 'translate(-50%,0)',
     display: 'flex',
     flexDirection: 'column',
-    position: 'absolute',
-    left: '50%',
-    top: '50%',
-    transform: 'translate(-50%, -50%)'
+    alignItems: 'center'
+  }
+
+  const playerListStyle = {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center'
   }
 
   const playerStyle = {
@@ -54,10 +61,9 @@ function Lobby(){
   }
 
   const h1Style = {
-    position: 'absolute',
-    left: '50%',
-    top: '20%',
-    transform: 'translate(-50%, 0)'
+    textAlign: 'center',
+    marginTop: '2em',
+    marginBottom: '2em'
   }
 
 
@@ -180,23 +186,25 @@ function Lobby(){
 
 
   return(
-    <div>
-      <button style = {buttonStyle} onClick = {leave}> Quit </button>
-      <h1 style = {h1Style}> Lobby </h1>
-      <div style = {containerStyle}>
-      {
-        players.map((player, index) =>
-          <div style = {playerStyle} key = {player.id}>
-            {index + 1}: {player.user_name}
-          </div>
-        )
-      }
+    <React.Fragment>
+      <Button style = {buttonStyle} onClick = {leave} variant = "outlined" color = "secondary"> Quit </Button>
+      <div style = {baseContainerStyle}>
+        <h1 style = {h1Style}> Lobby </h1>
+        <div style = {playerListStyle}>
+        {
+          players.map((player, index) =>
+            <div style = {playerStyle} key = {player.id}>
+              {index + 1}: {player.user_name}
+            </div>
+          )
+        }
 
-      {
-        isHost?
-        <Button style = {{marginTop: '2em'}} onClick = {handleClick}> Start Game </Button>
-        :<Button disabled> Start Game </Button>
-      }
+        {
+          isHost?
+          <Button style = {{marginTop: '2em'}} onClick = {handleClick} variant = "outlined" color = "inherit"> Start Game </Button>
+          :<Button disabled variant = "outlined" color = "disabled"> Start Game </Button>
+        }
+        </div>
       </div>
 
       {
@@ -212,8 +220,7 @@ function Lobby(){
             {error}
           </div>
       }
-
-    </div>
+    </React.Fragment>
   );
 }
 

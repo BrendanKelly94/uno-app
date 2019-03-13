@@ -2,6 +2,7 @@ import React, { useState, useContext } from 'react';
 import AuthModal from './modals/AuthModal';
 import CreateModal from './modals/CreateModal';
 import authStoreContext from './context/authStoreContext';
+import Button from '@material-ui/core/Button';
 import history from './utils/history.js';
 import ApiEndpoint from './utils/ApiEndpoint.js';
 
@@ -9,12 +10,11 @@ function Home(){
   const [ auth, setAuth ] = useState(false);
   const [ create, setCreate ] = useState(false);
   const [ context, setContext ] = useContext(authStoreContext);
-  
+
   const h1Style = {
-    position: 'absolute',
-    left: '50%',
-    top: '20%',
-    transform: 'translate(-50%, 0)'
+    textAlign: 'center',
+    marginBottom: '2em',
+    marginTop: '2em'
   }
 
   const navbarStyle = {
@@ -25,18 +25,21 @@ function Home(){
     alignItems: 'center'
   }
 
-  const containerStyle = {
+  const baseContainerStyle = {
     position: 'absolute',
-    left: '50%',
-    transform: 'translate(-50%, 0)',
-    display: 'flex',
     height: '80%',
-    justifyContent: 'center',
-    flexDirection: 'column'
+    left: '50%',
+    transform: 'translate(-50%,0)',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center'
   }
 
-  const buttonStyle = {
-    marginTop: '100%'
+  const buttonContainerStyle = {
+    display: 'flex',
+    height: '60%',
+    flexDirection: 'column',
+    justifyContent: 'space-evenly'
   }
 
   const handleJoin = () => {
@@ -67,20 +70,20 @@ function Home(){
 
   return(
     <React.Fragment>
-      <h1 style = {h1Style}>UNO</h1>
       <div style = {navbarStyle}>
         {
           context.user_name?
           context.user_name
-          :<button onClick = {() => setAuth(!auth)}>login</button>
+          :<Button color = "primary" onClick = {() => setAuth(!auth)}>login</Button>
         }
       </div>
-
-      <div style = {containerStyle}>
-        <button id = 'join-button' style = {buttonStyle} onClick = {handleJoin}>Join Game</button>
-        <button id = 'create-button' style = {buttonStyle} onClick = {handleCreate}>Create Game</button>
-        <AuthModal open = {auth} setOpen = {() => setAuth(!auth)} login = {login}/>
-        <CreateModal open = {create} setOpen = {() => setCreate(!create)}/>
+      <div style = {baseContainerStyle}>
+        <h1 style = {h1Style}>UNO</h1>
+        <div style = {buttonContainerStyle}>
+          <Button id = 'join-button' variant = "contained" color = "primary" onClick = {handleJoin}>Join Game</Button>
+          <Button id = 'create-button' variant = "contained" color = "primary" onClick = {handleCreate}>Create Game</Button>
+          <AuthModal open = {auth} setOpen = {() => setAuth(!auth)} login = {login}/>
+        </div>
       </div>
     </React.Fragment>
   )

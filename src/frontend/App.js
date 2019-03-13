@@ -7,6 +7,7 @@ import BuildPlayers from './utils/BuildPlayers'
 import FindInitTransform from './utils/FindInitTransform';
 import InitialState from './utils/InitialState';
 import ApiEndpoint from './utils/ApiEndpoint';
+import Button from '@material-ui/core/Button';
 import Player from './Player';
 import CardInPlay from './CardInPlay';
 import Hand from './Hand'
@@ -301,7 +302,7 @@ function App() {
   return (
 
       <div>
-        <button style = {buttonStyle} onClick = {leave}> Quit </button>
+        <Button style = {buttonStyle} onClick = {leave} variant = "outlined" color = "secondary"> Quit </Button>
         {
           shiftedPlayers.map((player) =>
             <Player

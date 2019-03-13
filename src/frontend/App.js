@@ -49,6 +49,12 @@ function App() {
     transform: `translate(-50%, -50%) ${`scale(${scaleFactor.size + .2})`}`
   }
 
+  const buttonStyle = {
+    position: 'absolute',
+    top: '1em',
+    left: '1em'
+  }
+
   const endedStyle = {
     display: 'flex',
     justifyContent: 'center',
@@ -295,6 +301,7 @@ function App() {
   return (
 
       <div>
+        <button style = {buttonStyle} onClick = {leave}> Quit </button>
         {
           shiftedPlayers.map((player) =>
             <Player

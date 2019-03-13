@@ -9,7 +9,7 @@ function Lobby(){
   const [ login, setLogin ] = useContext(authStoreContext);
   const [players, setPlayers] = useState([]);
   const [isFirst, setIsFirst] = useState(true);
-  const [err, setError] = useState(null);
+  const [error, setError] = useState(null);
   const [hasEnded, setHasEnded] = useState(false);
   const [isHost, setIsHost] = useState(false);
   const [myId, setMyId] = useState(null);
@@ -19,6 +19,25 @@ function Lobby(){
   const [gameId, setGameId] = useState(gId);
   let socket;
   const first = null;
+
+  const buttonStyle = {
+    positon: 'absolute',
+    top: '1em',
+    left: '1em'
+  }
+
+  const containerStyle = {
+    display: 'flex',
+    flexDirection: 'column',
+    position: 'absolute',
+    left: '50%',
+    top: '50%',
+    transform: 'translate(-50%, -50%)'
+  }
+
+  const playerStyle = {
+    marginBottom: '1em'
+  }
 
   const endedStyle = {
     display: 'flex',
@@ -33,6 +52,14 @@ function Lobby(){
     color: '#000',
     fontSize: '2em'
   }
+
+  const h1Style = {
+    position: 'absolute',
+    left: '50%',
+    top: '20%',
+    transform: 'translate(-50%, 0)'
+  }
+
 
 
   const leave = async (e) => {
@@ -129,6 +156,14 @@ function Lobby(){
     }
   }, [hasEnded])
 
+  useEffect(() => {
+    if(error !== null){
+      setTimeout(() => {
+        history.push('/gamesList')
+      }, 2000)
+    }
+  }, [error])
+
   async function handleClick(){
     const index = players.findIndex((player) => player.user_name === login.user_name)
     if(players[index].is_host){
@@ -146,26 +181,36 @@ function Lobby(){
 
   return(
     <div>
+      <button style = {buttonStyle} onClick = {leave}> Quit </button>
+      <h1 style = {h1Style}> Lobby </h1>
+      <div style = {containerStyle}>
       {
-        players.map(player =>
-          <div>
-            {player.user_name}
+        players.map((player, index) =>
+          <div style = {playerStyle} key = {player.id}>
+            {index + 1}: {player.user_name}
           </div>
         )
       }
 
       {
         isHost?
-        <Button onClick = {handleClick}> Start Game </Button>
+        <Button style = {{marginTop: '2em'}} onClick = {handleClick}> Start Game </Button>
         :<Button disabled> Start Game </Button>
       }
+      </div>
 
       {
-        hasEnded?
+        hasEnded &&
           <div style = {endedStyle}>
             Host has ended game
           </div>
-          :null
+      }
+
+      {
+        error &&
+          <div style = {endedStyle}>
+            {error}
+          </div>
       }
 
     </div>

@@ -6,10 +6,16 @@ import history from './utils/history.js';
 import ApiEndpoint from './utils/ApiEndpoint.js';
 
 function Home(){
-  const [auth, setAuth] = useState(false);
-  const [create, setCreate] = useState(false);
-  const [context, setContext] = useContext(authStoreContext);
-
+  const [ auth, setAuth ] = useState(false);
+  const [ create, setCreate ] = useState(false);
+  const [ context, setContext ] = useContext(authStoreContext);
+  
+  const h1Style = {
+    position: 'absolute',
+    left: '50%',
+    top: '20%',
+    transform: 'translate(-50%, 0)'
+  }
 
   const navbarStyle = {
     display: 'flex',
@@ -46,7 +52,6 @@ function Home(){
       setAuth(!auth);
     }else{
       const newGameData = await new ApiEndpoint('/api/newGame').postReq({botFill: true})
-      console.log(newGameData)
       if(newGameData.hasOwnProperty('err')){
         // setError(newGameData.err)
         console.log('err')
@@ -62,6 +67,7 @@ function Home(){
 
   return(
     <React.Fragment>
+      <h1 style = {h1Style}>UNO</h1>
       <div style = {navbarStyle}>
         {
           context.user_name?

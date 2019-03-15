@@ -12,6 +12,7 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
   const [ prevCount, setPrevCount ] = useState(hand.length);
   const [ hasDrawn, setHasDrawn ] = useState({status:false, card: null});
   const [ colorChange, setColorChange ] = useState({status:false, cardId: null});
+  const [ hasSubmitted, setHasSubmitted ] = useState(false);
 
   const location = history.location.pathname.split('/');
   const gameId = location[location.length - 1];
@@ -49,7 +50,8 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
   // const tl = new TimelineLite;
 
   function handleOptionClick(e){
-    if(!isAnimating && isMyTurn && !hasDrawn.status){
+    if(!isAnimating && isMyTurn && !hasDrawn.status && !hasSubmitted){
+      setHasSubmitted(true);
       const eId = e.currentTarget.id;
       const cardId = parseInt(eId.split('-')[1], 10);
       const index = hand.findIndex((card) => cardId === card.id);
@@ -69,10 +71,15 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
   }
 
   async function handleDrawClick(){
-    if(isMyTurn && !isAnimating && !hasDrawn.status && !colorChange.status){
+    if(isMyTurn && !isAnimating && !hasDrawn.status && !colorChange.status && !hasSubmitted){
       try{
+        setHasSubmitted(true);
         const card = await drawCard();
-        setHasDrawn({status: true, card: card})
+        tl.to('.hand-card', .5, {
+          onComplete: () => {
+            setHasDrawn({status: true, card: card})
+          }
+        })
       }catch(e){
         console.log(e);
       }
@@ -110,7 +117,7 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
     }
     setOptions([]);
     setHasDrawn({status: false, card: null});
-
+    setHasSubmitted(false);
   }
 
   async function isMyTurnUpdate(){

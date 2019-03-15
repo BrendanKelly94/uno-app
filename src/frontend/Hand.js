@@ -49,7 +49,7 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
   // const tl = new TimelineLite;
 
   function handleOptionClick(e){
-    if(!isAnimating && isMyTurn){
+    if(!isAnimating && isMyTurn && !hasDrawn.status){
       const eId = e.currentTarget.id;
       const cardId = parseInt(eId.split('-')[1], 10);
       const index = hand.findIndex((card) => cardId === card.id);
@@ -70,9 +70,9 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
 
   async function handleDrawClick(){
     if(isMyTurn && !isAnimating && !hasDrawn.status && !colorChange.status){
-      setHasDrawn({status: true, card: card})
       try{
         const card = await drawCard();
+        setHasDrawn({status: true, card: card})
       }catch(e){
         console.log(e);
       }

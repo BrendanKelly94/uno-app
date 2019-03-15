@@ -72,9 +72,7 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
     if(isMyTurn && !isAnimating && !hasDrawn.status && !colorChange.status){
       try{
         const card = await drawCard();
-        tl.to('.hand-card', .5, {
-          onComplete: () => setHasDrawn({status: true, card: card})
-        })
+        setHasDrawn({status: true, card: card})
       }catch(e){
         console.log(e);
       }

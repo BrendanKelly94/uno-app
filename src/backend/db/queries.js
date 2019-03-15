@@ -20,7 +20,9 @@ const findUser = ({name}) => {
 //Games
 
 const getGames = () => {
-  return knex('Games').select();
+  return knex('Games')
+        .where('has_started', false)
+        .select();
 }
 
 const findGame = ({gameId}) => {
@@ -40,6 +42,12 @@ const removeGame = async ({gameId}) => {
          .where('id', gameId)
          .delete()
          .returning('id');
+}
+
+const setHasStarted = async ({gameId}) => {
+  return knex('Games')
+         .where('id', gameId)
+         .update('has_started', true);
 }
 
 const fillBots = async ({gameId}) => {
@@ -505,6 +513,7 @@ module.exports = {
   findGame: findGame,
   createGame: createGame,
   removeGame: removeGame,
+  setHasStarted: setHasStarted,
   fillBots: fillBots,
   setHost: setHost,
   setTurn: setTurn,

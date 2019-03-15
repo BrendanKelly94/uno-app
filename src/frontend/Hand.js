@@ -69,7 +69,7 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
   }
 
   async function handleDrawClick(){
-    if(isMyTurn && !isAnimating){
+    if(isMyTurn && !isAnimating && !hasDrawn.status && !colorChange.status){
       try{
         const card = await drawCard();
         tl.to('.hand-card', .5, {

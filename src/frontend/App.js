@@ -53,7 +53,8 @@ function App() {
   const buttonStyle = {
     position: 'absolute',
     top: '1em',
-    left: '1em'
+    left: '1em',
+    zIndex: '100'
   }
 
   const endedStyle = {

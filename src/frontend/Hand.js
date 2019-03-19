@@ -22,7 +22,9 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
     bottom: '3%',
     transform: `translate(-50%, 0) scale(${scaleFactor})`,
     display: 'flex',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    backgroundColor: (isMyTurn)? '#ffff00': '#fff',
+    boxShadow: (isMyTurn)? '0px 0px 40px 20px #ffff00': ''
   }
 
   const cChangeContainerStyle = {

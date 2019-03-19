@@ -35,7 +35,8 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: 'grey'
+      backgroundColor: 'grey',
+      zIndex: 10
   }
 
   const drawBoxStyle = {
@@ -198,10 +199,10 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
     {
      colorChange.status?
      <div style = {cChangeContainerStyle}>
-       <Card callback = {handleColorChange} cId = 'color-red' style = {{backgroundColor: 'red', zIndex: 100}}/>
-       <Card callback = {handleColorChange} cId = 'color-blue' style = {{backgroundColor: 'blue', zIndex: 100}}/>
-       <Card callback = {handleColorChange} cId = 'color-green' style = {{backgroundColor: 'green', zIndex: 100}}/>
-       <Card callback = {handleColorChange} cId = 'color-yellow' style = {{backgroundColor: 'yellow', zIndex: 100}}/>
+       <Card callback = {handleColorChange} cId = 'color-red' style = {{backgroundColor: 'red', zIndex: 10}}/>
+       <Card callback = {handleColorChange} cId = 'color-blue' style = {{backgroundColor: 'blue', zIndex: 10}}/>
+       <Card callback = {handleColorChange} cId = 'color-green' style = {{backgroundColor: 'green', zIndex: 10}}/>
+       <Card callback = {handleColorChange} cId = 'color-yellow' style = {{backgroundColor: 'yellow', zIndex: 10}}/>
      </div>
      :null
    }

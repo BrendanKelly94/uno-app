@@ -24,7 +24,8 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
     display: 'flex',
     justifyContent: 'center',
     backgroundColor: (isMyTurn)? '#ffff00': '#fff',
-    boxShadow: (isMyTurn)? '0px 0px 40px 20px #ffff00': ''
+    boxShadow: (isMyTurn)? '0px 0px 40px 20px #ffff00': '',
+    transition: 'all .5s ease'
   }
 
   const cChangeContainerStyle = {
@@ -43,13 +44,14 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
 
   const drawBoxStyle = {
     position: 'absolute',
-    width: '70%',
+    width: '40%',
     height: `${70 * scaleFactor}px`,
     left:'50%',
     top: '50%',
     transform: 'translate(-50%, -50%)',
     backgroundColor: 'transparent'
   }
+
   // const tl = new TimelineLite;
 
   function handleOptionClick(e){
@@ -195,9 +197,9 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
           )
       }
     </div>
-    {
-      <div style = {drawBoxStyle} onClick = {handleDrawClick}></div>
-    }
+
+    <div style = {drawBoxStyle} onClick = {handleDrawClick}></div>
+
     {
      colorChange.status?
      <div style = {cChangeContainerStyle}>

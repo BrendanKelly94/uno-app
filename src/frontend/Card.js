@@ -1,4 +1,6 @@
 import React from 'react';
+import { jsx, css, keyframes } from '@emotion/core'
+
 
 function Card({ cId, style, callback }){
   const cardStyle = {

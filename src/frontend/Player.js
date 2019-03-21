@@ -10,10 +10,14 @@ const Player = ({ tl, pId, uName, playerStatus, translate, rotate, scale, turnId
     display: 'flex',
     justifyContent: 'center',
     position: 'absolute',
-    width: '10em',
+    width: '7em',
     left: `calc(50% - 5em)`,
     top: `calc(50% - 3.563em)`,
-    transform: `translate(${translate.x}px, ${translate.y}px)rotate(${rotate}deg)scale(${scale})`
+    transform: `translate(${translate.x}px, ${translate.y}px)rotate(${rotate}deg)scale(${scale})`,
+    backgroundColor: (isMyTurn)? '#ffff00': '#fff',
+    boxShadow: (isMyTurn)? '0px 0px 40px 20px #ffff00': '',
+    zIndex: (isMyTurn)? '1':'0',
+    transition: 'all .5s ease'
   }
   const indicatorStyle = {
     width: '1em',

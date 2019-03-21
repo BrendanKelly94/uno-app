@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import Card from './Card';
 import { TweenLite, TimelineLite, TimelineMax } from 'gsap';
+import anime from 'animejs';
 
 const DrawCard = React.memo(({ tl, playerStatus, myId, scaleFactor, isMyTurn}) => {
   const [ isFirst, setIsFirst ] = useState(true);
   const range = [...Array(4)].map((_, i) => i);
-  // const tl = new TimelineLite;
+
+  let glow;
 
   useEffect(() => {
     if(!isFirst && playerStatus.isDrawing){
@@ -26,9 +28,31 @@ const DrawCard = React.memo(({ tl, playerStatus, myId, scaleFactor, isMyTurn}) =
 
 
     }else{
+      glow = anime(
+        {
+          targets: '#draw-card',
+          backgroudColor: 'b2bfff',
+          duration: 1000,
+          easing: 'easeInOut',
+          autoplay: false,
+          loop: true
+        }
+      );
+      if(isMyTurn) glow.play();
       setIsFirst(false);
     }
   }, [playerStatus]);
+
+  useEffect(() => {
+    if(isMyTurn){
+      console.log(glow)
+      glow.play()
+    }else{
+      if(glow !== undefined){
+        glow.pause()
+      }
+    }
+  }, [isMyTurn])
 
 
   return(

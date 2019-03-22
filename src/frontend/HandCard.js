@@ -1,6 +1,6 @@
 import React from 'react';
 
-function HandCard({ value, color , style, cId, cClass, submitCard }){
+const HandCard = React.forwardRef(({ value, color , style, cId, cClass, submitCard }, ref) => {
   const ellipseStyle = {
     fill: '#fff',
     strokeWidth: '1',
@@ -32,7 +32,7 @@ function HandCard({ value, color , style, cId, cClass, submitCard }){
   }
 
   return(
-    <svg id = {cId? cId: ''} className = {cClass? cClass: ''} onClick = {submitCard?submitCard: () => true} viewBox="0 0 50 70" width = "50" height = "70" style = {style? style: {}} xmlns="http://www.w3.org/2000/svg" >
+    <svg ref = {ref} id = {cId? cId: ''} className = {cClass? cClass: ''} onClick = {submitCard?submitCard: () => true} viewBox="0 0 50 70" width = "50" height = "70" style = {style? style: {}} xmlns="http://www.w3.org/2000/svg" >
 
       <rect x="1" y="1" width="48" height="68" rx="5" ry="5" style = {{fill:'#fff',strokeWidth:'1', stroke:'#000'}}/>
       {
@@ -52,6 +52,6 @@ function HandCard({ value, color , style, cId, cClass, submitCard }){
 
     </svg>
   )
-}
+});
 
 export default HandCard;

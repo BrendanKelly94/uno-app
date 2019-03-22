@@ -16,6 +16,7 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
 
   const location = history.location.pathname.split('/');
   const gameId = location[location.length - 1];
+
   const containerStyle = {
     position: 'absolute',
     left: '50%',
@@ -23,10 +24,12 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
     transform: `translate(-50%, 0) scale(${scaleFactor})`,
     display: 'flex',
     justifyContent: 'center',
-    backgroundColor: (isMyTurn)? '#ffff00': '#fff',
-    boxShadow: (isMyTurn)? '0px 0px 40px 20px #ffff00': '',
-    transition: 'all .5s ease'
-  }
+    transition: 'all .5s ease',
+    backgroundColor: (isMyTurn)? '#00ffed': '#fff',
+    boxShadow: (isMyTurn)? '0px 0px 40px 20px #00ffed': '',
+  };
+
+
 
   const cChangeContainerStyle = {
       position: 'absolute',
@@ -56,7 +59,6 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
 
   function handleOptionClick(e){
     if(!isAnimating && isMyTurn && !hasDrawn.status && !hasSubmitted){
-      setHasSubmitted(true);
       const eId = e.currentTarget.id;
       const cardId = parseInt(eId.split('-')[1], 10);
       const index = hand.findIndex((card) => cardId === card.id);
@@ -69,8 +71,14 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
       }
       if(isOption && hand[index].color !== 'black'){
         submitCardAction({cardId:cardId});
+        setHasSubmitted(true);
+
       }else{
-        if(isOption) setColorChange({status: true, cardId:cardId});
+        if(isOption){
+          setColorChange({status: true, cardId:cardId});
+          setHasSubmitted(true);
+        }
+
       }
     }
   }
@@ -115,14 +123,18 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
       .to(source, .5, {x: translate.x/scaleFactor, y: translate.y/scaleFactor, rotation: variance, scale: 1.2,
         onComplete: () => {
           submitCard({cId: cardId, color: color, hasDrawn})
+          setOptions([]);
+          setHasDrawn({status: false, card: null});
+          setHasSubmitted(false);
         }
       })
     }else{
       submitCard({cId: cardId, hasDrawn: true});
+      setOptions([]);
+      setHasDrawn({status: false, card: null});
+      setHasSubmitted(false);
     }
-    setOptions([]);
-    setHasDrawn({status: false, card: null});
-    setHasSubmitted(false);
+
   }
 
   async function isMyTurnUpdate(){
@@ -170,12 +182,13 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
     isMyTurnUpdate();
   }, [isMyTurn]);
 
+
   useEffect(() => {
     hasDrawnUpdate();
   }, [hasDrawn])
 
   useEffect(() => {
-    tl.to('.hand-card', .5, {yPercent: 0})
+      tl.to('.hand-card', .5, {yPercent: 0})
   }, [hand])
 
   return(

@@ -1,12 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { TweenLite, TimelineLite } from 'gsap';
 import ApiEndpoint from './utils/ApiEndpoint.js';
 import Card from './Card'
 
-const Player = ({ tl, pId, uName, playerStatus, translate, rotate, scale, turnId }) => {
+const Player = React.memo(({ tl, pId, uName, playerStatus, translate, rotate, scale, turnId }) => {
   const [ cardCount, setCardCount ] = useState(7);
   const [ isMyTurn, setIsMyTurn ] = useState(false);
-  const containerStyle = {
+
+  const topCard = useRef(null);
+
+  const containerStyle= {
     display: 'flex',
     justifyContent: 'center',
     position: 'absolute',
@@ -14,11 +17,12 @@ const Player = ({ tl, pId, uName, playerStatus, translate, rotate, scale, turnId
     left: `calc(50% - 5em)`,
     top: `calc(50% - 3.563em)`,
     transform: `translate(${translate.x}px, ${translate.y}px)rotate(${rotate}deg)scale(${scale})`,
-    backgroundColor: (isMyTurn)? '#ffff00': '#fff',
-    boxShadow: (isMyTurn)? '0px 0px 40px 20px #ffff00': '',
+    backgroundColor: (isMyTurn)? '#00ffed': '#fff',
+    boxShadow: (isMyTurn)? '0px 0px 40px 20px #00ffed': '',
     zIndex: (isMyTurn)? '1':'0',
     transition: 'all .5s ease'
   }
+
   const indicatorStyle = {
     width: '1em',
     heigh: '1em',
@@ -46,11 +50,9 @@ const Player = ({ tl, pId, uName, playerStatus, translate, rotate, scale, turnId
   async function updatePlayerState(){
     try{
       if(pId === playerStatus.id && playerStatus.isAnimating && !playerStatus.isDrawing){
-        const topCard = document.getElementById(`player-${pId}-card-0`);
-
         tl
-        .set(topCard, {rotationY: 0})
-        .to(topCard, .5, {rotationY: 180,
+        .set(topCard.current, {rotationY: 0})
+        .to(topCard.current, .5, {rotationY: 180,
             onComplete: async () => {
                 const data = await new ApiEndpoint(`/api/getPlayerHandCount/${pId}`).getReq();
                 setCardCount(data.count);
@@ -93,18 +95,23 @@ const Player = ({ tl, pId, uName, playerStatus, translate, rotate, scale, turnId
   const range = [...Array(cardCount)].map((_, i) => i);
   return(
     <React.Fragment>
-
-    <div style = {containerStyle}>
-      <div id = {`player-${pId}-name`} style = {nameStyle} >{uName}</div>
-      {
-        range.map(i =>
-          <Card cId = {`player-${pId}-card-${(cardCount - 1) - i}`} style = {(i === 0)?{ zIndex: `${i}`, marginLeft: '0 !important'}:{ zIndex: `${i}`, marginLeft: '-45px'}}/>
-        )
-      }
-    </div>
+      <div style = {containerStyle}>
+        <div id = {`player-${pId}-name`} style = {nameStyle} >{uName}</div>
+        {
+          range.map(i =>{
+            if(((cardCount - 1) - i) === 0){
+              return <Card cId = {`player-${pId}-card-${(cardCount - 1) - i}`} ref = {topCard} style = {(i === 0)?{ zIndex: `${i}`, marginLeft: '0 !important'}:{ zIndex: `${i}`, marginLeft: '-45px'}}/>
+            }else{
+              return <Card cId = {`player-${pId}-card-${(cardCount - 1) - i}`} style = {(i === 0)?{ zIndex: `${i}`, marginLeft: '0 !important'}:{ zIndex: `${i}`, marginLeft: '-45px'}}/>
+            }
+          })
+        }
+      </div>
     </React.Fragment>
     //chat bubble will go here
   );
-}
+}, (oldP, newP) => {
+
+})
 
 export default Player;

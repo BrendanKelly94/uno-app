@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Card from './Card';
 import { TweenLite, TimelineLite, TimelineMax } from 'gsap';
 import anime from 'animejs';
@@ -6,14 +6,15 @@ import anime from 'animejs';
 const DrawCard = React.memo(({ tl, playerStatus, myId, scaleFactor, isMyTurn}) => {
   const [ isFirst, setIsFirst ] = useState(true);
   const range = [...Array(4)].map((_, i) => i);
+  const source = useRef(null);
 
-  let glow;
+  // let glowTl = new TimelineMax({paused:true, repeat: -1, yoyo: true});
+
 
   useEffect(() => {
     if(!isFirst && playerStatus.isDrawing){
-      const source = document.getElementById('draw-animate');
       const target = document.getElementById(`player-${playerStatus.id}-card-0`);
-      const sBox = source.getBoundingClientRect();
+      const sBox = source.current.getBoundingClientRect();
       const tBox = target.getBoundingClientRect();
 
       const transform = {
@@ -22,37 +23,32 @@ const DrawCard = React.memo(({ tl, playerStatus, myId, scaleFactor, isMyTurn}) =
       }
 
       tl
-      .to(source, .5, {x: transform.x/scaleFactor, y: transform.y/scaleFactor, scale: .8})
-      .to(source, .4, {opacity: 0}, '-=.4')
-      .set(source, {x: 0, y:0, scale: 1, opacity: 1})
+      .to(source.current, .5, {x: transform.x/scaleFactor, y: transform.y/scaleFactor, scale: .8})
+      .to(source.current, .4, {opacity: 0}, '-=.4')
+      .set(source.current, {x: 0, y:0, scale: 1, opacity: 1})
+
 
 
     }else{
-      glow = anime(
-        {
-          targets: '#draw-card',
-          backgroudColor: 'b2bfff',
-          duration: 1000,
-          easing: 'easeInOut',
-          autoplay: false,
-          loop: true
-        }
-      );
-      if(isMyTurn) glow.play();
+
+      // glowTl
+      // .to(source.current, 1, {backgroundColor: '#b2bfff'})
+
       setIsFirst(false);
     }
   }, [playerStatus]);
 
-  useEffect(() => {
-    if(isMyTurn){
-      console.log(glow)
-      glow.play()
-    }else{
-      if(glow !== undefined){
-        glow.pause()
-      }
-    }
-  }, [isMyTurn])
+  // useEffect(() => {
+  //   if(!isFirst){
+  //     if(isMyTurn){
+  //       console.log('play')
+  //       glowTl.play();
+  //     }else{
+  //       console.log('pause')
+  //       glowTl.pause();
+  //     }
+  //   }
+  // }, [isMyTurn])
 
 
   return(
@@ -75,12 +71,13 @@ const DrawCard = React.memo(({ tl, playerStatus, myId, scaleFactor, isMyTurn}) =
       }
       <Card
         cId = 'draw-card'
+        ref = {source}
         style = {{marginLeft: '-48px', zIndex: 2}}
       />
     </div>
   )
 }, (oldP, newP) => {
-  if(oldP.playerStatus.id === newP.playerStatus.id || newP.playerStatus.id === null){
+  if((oldP.playerStatus.id === newP.playerStatus.id)|| newP.playerStatus.id === null){
     return true;
   }else{
     return false;

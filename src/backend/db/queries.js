@@ -182,6 +182,7 @@ const getHand = ({playerId}) => {
 const setFirstCardInPlay = async ({gameId}) => {
   try{
     const deck = await getDeck({gameId: gameId});
+
     let found = false;
     let random;
     while(!found){
@@ -191,7 +192,7 @@ const setFirstCardInPlay = async ({gameId}) => {
     if(random.color === 'black'){
       const colors = ['red', 'yellow', 'green', 'blue'];
       const randomC = colors[Math.floor(Math.random() * 4)];
-      const cChange = await changeColor({cId: randomC.id, color: randomC});
+      const cChange = await changeColor({cId: random.id, color: randomC});
     }
     return knex('GameCards')
            .where('id', random.id)

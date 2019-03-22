@@ -2,7 +2,7 @@ import React from 'react';
 import { jsx, css, keyframes } from '@emotion/core'
 
 
-function Card({ cId, style, callback }){
+const Card = React.forwardRef(({ cId, style, callback }, ref) => {
   const cardStyle = {
     width: '50px',
     height: '70px',
@@ -12,8 +12,9 @@ function Card({ cId, style, callback }){
     backgroundColor: 'blue',
   }
   return(
-    <div id = {cId?cId:''} onClick = {callback? callback: () => true}style = {style?{...cardStyle, ...style}:cardStyle}></div>
+    <div id = {cId?cId:''} ref = {ref} onClick = {callback? callback: () => true}style = {style?{...cardStyle, ...style}:cardStyle}></div>
   );
-}
+});
+
 
 export default Card;

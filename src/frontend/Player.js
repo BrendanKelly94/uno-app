@@ -54,14 +54,22 @@ const Player = React.memo(({ tl, pId, uName, playerStatus, translate, rotate, sc
         .set(topCard.current, {rotationY: 0})
         .to(topCard.current, .5, {rotationY: 180,
             onComplete: async () => {
-                const data = await new ApiEndpoint(`/api/getPlayerHandCount/${pId}`).getReq();
-                setCardCount(data.count);
+              const data = await new ApiEndpoint(`/api/getPlayerHandCount/${pId}`).getReq();
+              setCardCount(data.count);
             }
         });
 
-      }else if(pId === playerStatus.id && (playerStatus.isDrawing || !playerStatus.isAnimating)){
+      }else if(pId === playerStatus.id && (!playerStatus.isDrawing && !playerStatus.isAnimating)){
         const data = await new ApiEndpoint(`/api/getPlayerHandCount/${pId}`).getReq();
         setCardCount(data.count);
+      }else if(pId === playerStatus.id && playerStatus.isDrawing){
+        tl
+        .to(topCard.current, .5, {
+          onComplete: async () => {
+            const data = await new ApiEndpoint(`/api/getPlayerHandCount/${pId}`).getReq();
+            setCardCount(data.count);
+          }
+        })
       }
     }catch(e){
       console.log(e);
@@ -81,15 +89,6 @@ const Player = React.memo(({ tl, pId, uName, playerStatus, translate, rotate, sc
       }
     }
   }, [turnId])
-
-  useEffect(() => {
-    if(isMyTurn){
-      tl.to(`#player-${pId}-name`, .2, {color: 'yellow'})
-    }else{
-      tl.to(`#player-${pId}-name`, .2, {color: '#fff'})
-    }
-
-  }, [isMyTurn])
 
 
   const range = [...Array(cardCount)].map((_, i) => i);

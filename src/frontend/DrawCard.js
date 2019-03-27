@@ -5,14 +5,15 @@ import anime from 'animejs';
 
 const DrawCard = React.memo(({ tl, playerStatus, myId, scaleFactor, isMyTurn}) => {
   const [ isFirst, setIsFirst ] = useState(true);
+  const [ glowTl, setGlowTl ] = useState(new TimelineMax({paused: true, repeat: -1, yoyo: true}))
   const range = [...Array(4)].map((_, i) => i);
   const source = useRef(null);
-
-  // let glowTl = new TimelineMax({paused:true, repeat: -1, yoyo: true});
-
+  const glowSource = useRef(null)
 
   useEffect(() => {
     if(!isFirst && playerStatus.isDrawing){
+      console.log(playerStatus.isDrawing)
+
       const target = document.getElementById(`player-${playerStatus.id}-card-0`);
       const sBox = source.current.getBoundingClientRect();
       const tBox = target.getBoundingClientRect();
@@ -24,37 +25,41 @@ const DrawCard = React.memo(({ tl, playerStatus, myId, scaleFactor, isMyTurn}) =
 
       tl
       .to(source.current, .5, {x: transform.x/scaleFactor, y: transform.y/scaleFactor, scale: .8})
-      .to(source.current, .4, {opacity: 0}, '-=.4')
+      .to(source.current, .2, {opacity: 0}, '-=.4')
       .set(source.current, {x: 0, y:0, scale: 1, opacity: 1})
 
 
 
     }else{
+      if(isFirst){
+        glowTl.to(glowSource.current, 1, {backgroundColor: "#e2ddff"})
 
-      // glowTl
-      // .to(source.current, 1, {backgroundColor: '#b2bfff'})
-
-      setIsFirst(false);
+        setIsFirst(false);
+      }
     }
   }, [playerStatus]);
 
-  // useEffect(() => {
-  //   if(!isFirst){
-  //     if(isMyTurn){
-  //       console.log('play')
-  //       glowTl.play();
-  //     }else{
-  //       console.log('pause')
-  //       glowTl.pause();
-  //     }
-  //   }
-  // }, [isMyTurn])
+  useEffect(() => {
+      if(isMyTurn){
+        glowTl.restart();
+        glowTl.play();
+      }else{
+        if(!isFirst){
+          console.log('pause')
+          glowTl.restart()
+          glowTl.pause();
+        }
+
+
+      }
+  }, [isMyTurn])
 
 
   return(
     <div style = {{display: 'flex'}}>
       <Card
         cId = 'draw-animate'
+        ref = {source}
         style = {{
           position: 'absolute',
           zIndex: 0,
@@ -71,17 +76,13 @@ const DrawCard = React.memo(({ tl, playerStatus, myId, scaleFactor, isMyTurn}) =
       }
       <Card
         cId = 'draw-card'
-        ref = {source}
+        ref = {glowSource}
         style = {{marginLeft: '-48px', zIndex: 2}}
       />
     </div>
   )
 }, (oldP, newP) => {
-  if((oldP.playerStatus.id === newP.playerStatus.id)|| newP.playerStatus.id === null){
-    return true;
-  }else{
-    return false;
-  }
+
 })
 
 export default DrawCard;

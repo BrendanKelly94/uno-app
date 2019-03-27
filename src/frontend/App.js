@@ -21,9 +21,7 @@ function App() {
   const [ login, setLogin ] = useContext(authStoreContext);
   const [ myId, setMyId ] = useState(null);
   const [ isHost, setIsHost ] = useState(false);
-  const [ turnId, setTurnId ] = useState(null);
-  const [ lastTurnId, setLastTurnId ] = useState(null);
-  const [ newCard, setNewCard ] = useState({value: null, color: ''});
+  const [ turnStatus, setTurnStatus ] = useState({turnId: null, lastTurnId: null , newCard: {value: null, color: ''}})
   const [ middleCard, setMiddleCard ] = useState({});
   const [ players, setPlayers ] = useState([]);
   const [ shiftedPlayers, setShiftedPlayers ] = useState([]);
@@ -108,8 +106,8 @@ function App() {
       tl
       .to('#draw-card', .5, {
         onComplete: () => {
-          setHand(handData.hand)
           setPlayerStatus({id: null, isAnimating: false, isDrawing: false})
+          setHand(handData.hand)
         }
       })
 
@@ -155,8 +153,11 @@ function App() {
         setShiftedPlayers(shift);
         setIsHost(playersData.players[myI].is_host);
         setMyId(mId);
-        setTurnId(gameData.game.turn_id);
-        setLastTurnId((myI -1 < 0)?playersData.players[playersData.players.length -1].id:mId);
+        setTurnStatus({
+          turnId: gameData.game.turn_id,
+          lastTurnId: (myI -1 < 0)?playersData.players[playersData.players.length -1].id:mId,
+          newCard: {value: null, color: ''}
+        })
         setHand(handData.hand);
         setMiddleCard(cIPData.card)
       }catch(e){
@@ -182,20 +183,16 @@ function App() {
             if(data.newCards.status){
               await cardsGiven({playerId:data.newCards.id, myId: myId});
             }
-            if(data.currTurn === myId){
-              const handData = await new ApiEndpoint(`/api/getHand/${myId}`).getReq();
-              setTurnId(data.currTurn);
-              setLastTurnId(data.lastTurn);
-              setNewCard((data.card.id === middleCard.id)?{id:-1}: data.card);
-              setHand(handData.hand)
-            }else{
+              console.log(data)
               if(data.hasDrawn){
                 setPlayerStatus({id: data.lastTurn, isAnimating: false, isDrawing: true})
               }
-              setTurnId(data.currTurn);
-              setLastTurnId(data.lastTurn);
-              setNewCard((data.card.id === middleCard.id)?{id:-1}: data.card);
-            }
+              setTurnStatus({
+                turnId: data.currTurn,
+                lastTurnId: data.lastTurn,
+                newCard: data.card
+              })
+      
           }catch(e){
             console.log(e);
           }
@@ -241,9 +238,9 @@ function App() {
 
   //animate player's new card to middle
   useEffect(() => {
-    if(newCard.id !== -1 && lastTurnId !== myId){
-      let target = document.getElementById(`player-${lastTurnId}-card-0`);
-      const lastI = players.findIndex(player => player.id === lastTurnId);
+    if(turnStatus.newCard.id !== -1 && turnStatus.lastTurnId !== myId){
+      let target = document.getElementById(`player-${turnStatus.lastTurnId}-card-0`);
+      const lastI = players.findIndex(player => player.id === turnStatus.lastTurnId);
       const initTransform = FindInitTransform(target, players[lastI].rotate, scaleFactor.size);
       // animate
       target = document.getElementById('card-in-play')
@@ -253,25 +250,25 @@ function App() {
       tl
       .set(source.current, {x: initTransform.x, y: initTransform.y, rotation: initTransform.rotate, scale: scaleFactor.size,
         onComplete: () => {
-          setPlayerStatus({id: lastTurnId, isAnimating: true, isDrawing: false});
+          setPlayerStatus({id: turnStatus.lastTurnId, isAnimating: true, isDrawing: false});
         }
       })
       .to(source.current, .25, {opacity: 1}, '+=.25')
       .to(source.current, .5, {x: bBox.x, y: bBox.y, rotation: variance, scale: scaleFactor.size + .2,
         onComplete: () => {
-          setMiddleCard({...newCard, variance: variance})
+          setMiddleCard({...turnStatus.newCard, variance: variance})
           setPlayerStatus({id: null, isAnimating: false, isDrawing: false})
         }
       })
       .set(source.current, {opacity: 0})
-    }else if(newCard.id !== -1 && lastTurnId === myId){
-      setMiddleCard(newCard);
-    }else if(newCard.id === -1){
-      setPlayerStatus({id: lastTurnId, isAnimating: false, isDrawing: true});
-      tl.to('#new', .5, {onComplete: () => setPlayerStatus({id: null, isAnimating: false, isDrawing: false})});
+    }else if(turnStatus.newCard.id !== -1 && turnStatus.lastTurnId === myId){
+      setMiddleCard(turnStatus.newCard);
+    }else if(turnStatus.newCard.id === -1 && turnStatus.lastTurnId !== myId){
+      setPlayerStatus({id: turnStatus.lastTurnId, isAnimating: false, isDrawing: true});
+      tl.to(source.current, .5, {onComplete: () => setPlayerStatus({id: null, isAnimating: false, isDrawing: false})});
     }
 
-  }, [newCard]);
+  }, [turnStatus.newCard]);
 
   useEffect( () => {
     if(myId !== null){
@@ -311,7 +308,7 @@ function App() {
               tl = {tl}
               uName = {player.user_name}
               pId = {player.id}
-              turnId = {turnId}
+              turnId = {turnStatus.turnId}
               playerStatus = {playerStatus}
               translate = {player.translate}
               rotate = {player.rotate}
@@ -326,7 +323,7 @@ function App() {
             playerStatus = {playerStatus}
             myId = {myId}
             scaleFactor = {scaleFactor.size + .2}
-            isMyTurn = {(turnId === myId && myId !== null)? true: false}
+            isMyTurn = {(turnStatus.turnId === myId && myId !== null)? true: false}
           />
           <CardInPlay card = {middleCard}/>
         </div>
@@ -335,8 +332,8 @@ function App() {
           tl = {tl}
           myId = {myId}
           hand = {hand}
-          isMyTurn = {(turnId === myId && myId !== null)? true: false}
-          lastTurnId = {lastTurnId}
+          isMyTurn = {(turnStatus.turnId === myId && myId !== null)? true: false}
+          lastTurnId = {turnStatus.lastTurnId}
           scaleFactor = {scaleFactor.size}
           submitCard = {submitCard}
           drawCard = {drawCard}
@@ -347,8 +344,8 @@ function App() {
         <HandCard
           cId = 'new'
           ref = {source}
-          value = {newCard.value}
-          color = {newCard.color}
+          value = {turnStatus.newCard.value}
+          color = {turnStatus.newCard.color}
           style = {{
             position: 'absolute',
             left: 0,

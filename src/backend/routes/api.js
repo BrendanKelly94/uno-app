@@ -134,9 +134,7 @@ router.post('/game/:id/start', async (req, res, next) => {
     const host = await queries.findPlayer({name: name});
     if(host[0].is_host){
       const x = await queries.setHasStarted({gameId: gameId});
-      console.log('set has started',x);
       const y = await queries.setFirstCardInPlay({gameId: gameId});
-      console.log('setFirstCardInPlay', y)
       const setTurn = await queries.setTurn({gameId: gameId, playerId: host[0].id});
       gameIo.to(gameId).emit('start', {});
       res.send({id:host[0].id})

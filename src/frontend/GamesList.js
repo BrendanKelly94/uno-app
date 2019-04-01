@@ -11,10 +11,12 @@ function GamesList(){
     isFirst: true,
   })
 
-  const h1Style = {
+  const headingStyle = {
     textAlign: 'center',
     marginBottom: '2em',
-    marginTop: '2em'
+    marginTop: '2em',
+    fontSize: '2em',
+    fontFamily: `Quicksand, sans-serif`
   }
 
   const buttonStyle = {
@@ -79,7 +81,7 @@ function GamesList(){
     <React.Fragment>
       <Button style = {buttonStyle} onClick = {navigateBack} variant = "outlined" color = "secondary"> Back </Button>
       <div style = {baseContainerStyle}>
-        <h1 style = {h1Style}>Available Games</h1>
+        <p style = {headingStyle}>Available Games</p>
         <div style = {listContainerStyle}>
           <div style = {gameListingStyle}>
             <h4>id</h4>

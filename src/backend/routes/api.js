@@ -422,7 +422,12 @@ gameIo.on('connection', (socket) => {
   });
 
   socket.on('disconnect', (data) => {
-  })
+  });
+
+  socket.on('newMessage', (data) => {
+    gameIo.to(data.gameId).emit('chatMessage', {message: data.message, user_name: data.userName})
+  });
+
 });
 
 

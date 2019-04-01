@@ -11,10 +11,12 @@ function Home(){
   const [ create, setCreate ] = useState(false);
   const [ context, setContext ] = useContext(authStoreContext);
 
-  const h1Style = {
+  const headingStyle = {
     textAlign: 'center',
     marginBottom: '2em',
-    marginTop: '2em'
+    marginTop: '2em',
+    fontSize: '4em',
+    fontFamily: `Quicksand, sans-serif`
   }
 
   const navbarStyle = {
@@ -73,12 +75,12 @@ function Home(){
       <div style = {navbarStyle}>
         {
           context.user_name?
-          context.user_name
+          <p style = {{fontFamily: 'Heebo sans-serif'}}>{context.user_name}</p>
           :<Button color = "primary" onClick = {() => setAuth(!auth)}>login</Button>
         }
       </div>
       <div style = {baseContainerStyle}>
-        <h1 style = {h1Style}>UNO</h1>
+        <p style = {headingStyle}>UNO</p>
         <div style = {buttonContainerStyle}>
           <Button id = 'join-button' variant = "contained" color = "primary" onClick = {handleJoin}>Join Game</Button>
           <Button id = 'create-button' variant = "contained" color = "primary" onClick = {handleCreate}>Create Game</Button>

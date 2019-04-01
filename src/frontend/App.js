@@ -7,6 +7,7 @@ import BuildPlayers from './utils/BuildPlayers'
 import FindInitTransform from './utils/FindInitTransform';
 import InitialState from './utils/InitialState';
 import ApiEndpoint from './utils/ApiEndpoint';
+import Chat from './Chat.js'
 import Button from '@material-ui/core/Button';
 import Player from './Player';
 import CardInPlay from './CardInPlay';
@@ -26,7 +27,9 @@ function App() {
   const [ players, setPlayers ] = useState([]);
   const [ shiftedPlayers, setShiftedPlayers ] = useState([]);
   const [ hand, setHand ] = useState([]);
-  const [ playerStatus, setPlayerStatus ] = useState({isAnimating: false, isDrawing: false, id: null})
+  const [ playerStatus, setPlayerStatus ] = useState({isAnimating: false, isDrawing: false, id: null});
+  const [ socket, setSocket ] = useState(io('/game',{transports: ['websocket'], upgrade:false}));
+  const [ chatToggle, setChatToggle ] = useState(false);
   const [ hasEnded, setHasEnded] = useState(false);
   const [ wonName, setWonName ] = useState(null);
   const scaleFactor = useScale();
@@ -34,9 +37,16 @@ function App() {
   const first = null;
   const location = history.location.pathname.split('/');
   const gameId = location[location.length - 1];
-  let socket;
 
   const tl = new TimelineMax;
+
+  const baseContainerStyle = {
+    position: 'absolute',
+    height: '100%',
+    width: '100%',
+    top: 0,
+    left: 0,
+  }
 
   const middleStyle = {
     display: 'flex',
@@ -55,6 +65,13 @@ function App() {
     zIndex: '100'
   }
 
+  const chatButtonStyle = {
+    position: 'absolute',
+    top: '1em',
+    right: '1em',
+    zIndex: hasEnded?0: 11
+  }
+
   const endedStyle = {
     display: 'flex',
     justifyContent: 'center',
@@ -64,7 +81,7 @@ function App() {
     transform: `translate(-50%, -50%)`,
     width: '50%',
     height: '50%',
-    backgroundColor: '#fff',
+    backgroundColor: 'transparent',
     color: '#000',
     fontSize: '2em'
   }
@@ -174,7 +191,6 @@ function App() {
 
   useEffect(() => {
     if(myId !== null){
-        socket = io('/game',{transports: ['websocket'], upgrade: false});
         socket.emit('join', {gameId: gameId});
         //socket events
         socket.on('newTurn', async (data) => {
@@ -192,7 +208,7 @@ function App() {
                 lastTurnId: data.lastTurn,
                 newCard: data.card
               })
-      
+
           }catch(e){
             console.log(e);
           }
@@ -280,7 +296,16 @@ function App() {
   }, [myId])
 
   useEffect(() => {
+    if(chatToggle){
+      document.getElementById('gameContainer').style.filter = 'blur(1em)';
+    }else{
+      document.getElementById('gameContainer').style.filter = ''
+    }
+  }, [chatToggle])
+
+  useEffect(() => {
     if(hasEnded){
+      document.getElementById('gameContainer').style.filter = 'blur(1em)';
       setTimeout(() => {
         history.push('/gamesList');
       }, 2000)
@@ -289,6 +314,7 @@ function App() {
 
   useEffect(() => {
     if(wonName !== null){
+      document.getElementById('gameContainer').style.filter = 'blur(1em)';
       setTimeout(() => {
         leave();
         history.push('/gamesList');
@@ -298,9 +324,9 @@ function App() {
 
 
   return (
+    <React.Fragment>
+      <div id = 'gameContainer' style = {baseContainerStyle}>
 
-      <div>
-        <Button style = {buttonStyle} onClick = {leave} variant = "outlined" color = "secondary"> Quit </Button>
         {
           shiftedPlayers.map((player) =>
             <Player
@@ -354,23 +380,28 @@ function App() {
             opacity: 0
           }}
         />
-
-        {
-          hasEnded?
-          <div style = {endedStyle}>
-            Host has Ended Game
-          </div>
-          :null
-        }
-
-        {
-          wonName?
-          <div style = {endedStyle}>
-            Player {wonName} has won the game!
-          </div>
-          :null
-        }
       </div>
+      
+      <Button style = {buttonStyle} onClick = {leave} variant = "outlined" color = "secondary"> Quit </Button>
+      <Button style = {chatButtonStyle} variant = 'outlined' color = {chatToggle? 'secondary': 'inherit'} onClick = {() => setChatToggle(!chatToggle)}> Chat </Button>
+      <Chat chatToggle = {chatToggle} socket = {socket} gameId = {gameId} userName = {login.user_name}/>
+
+      {
+        hasEnded?
+        <div style = {endedStyle}>
+          Host has Ended Game
+        </div>
+        :null
+      }
+
+      {
+        wonName?
+        <div style = {endedStyle}>
+          Player {wonName} has won the game!
+        </div>
+        :null
+      }
+    </React.Fragment>
   );
 }
 

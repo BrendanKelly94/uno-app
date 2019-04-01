@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import Card from './Card';
 import { TweenLite, TimelineLite, TimelineMax } from 'gsap';
-import anime from 'animejs';
 
 const DrawCard = React.memo(({ tl, playerStatus, myId, scaleFactor, isMyTurn}) => {
   const [ isFirst, setIsFirst ] = useState(true);
@@ -33,7 +32,6 @@ const DrawCard = React.memo(({ tl, playerStatus, myId, scaleFactor, isMyTurn}) =
     }else{
       if(isFirst){
         glowTl.to(glowSource.current, 1, {backgroundColor: "#e2ddff"})
-
         setIsFirst(false);
       }
     }

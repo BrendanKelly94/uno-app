@@ -1,7 +1,9 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import authStoreContext from './context/authStoreContext.js';
+import Chat from './Chat.js'
 import history from './utils/history.js';
 import Button from '@material-ui/core/Button';
+import TextField from '@material-ui/core/TextField';
 import ApiEndpoint from './utils/ApiEndpoint';
 import io from 'socket.io-client';
 
@@ -13,24 +15,33 @@ function Lobby(){
   const [ hasEnded, setHasEnded ] = useState(false);
   const [ isHost, setIsHost ] = useState(false);
   const [ myId, setMyId ] = useState(null);
+  const [ socket, setSocket ] = useState(io('/game',{transports: ['websocket'], upgrade:false}));
+  const [ chatToggle, setChatToggle ] = useState(false);
 
   const location = history.location.pathname.split('/');
   const gId = parseInt(location[location.length - 1], 10)
   const [ gameId, setGameId ] = useState(gId);
-  let socket;
   const first = null;
 
   const buttonStyle = {
-    positon: 'absolute',
+    position: 'absolute',
     top: '1em',
     left: '1em'
+  }
+
+  const chatButtonStyle = {
+    position: 'absolute',
+    top: '1em',
+    right: '1em',
+    zIndex: 11
   }
 
   const baseContainerStyle = {
     position: 'absolute',
     height: '100%',
-    left: '50%',
-    transform: 'translate(-50%,0)',
+    width: '100%',
+    top: 0,
+    left: 0,
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center'
@@ -55,15 +66,17 @@ function Lobby(){
     transform: `translate(-50%, -50%)`,
     width: '50%',
     height: '50%',
-    backgroundColor: '#fff',
+    backgroundColor: 'transparent',
     color: '#000',
     fontSize: '2em'
   }
 
-  const h1Style = {
+  const headingStyle = {
     textAlign: 'center',
+    marginBottom: '2em',
     marginTop: '2em',
-    marginBottom: '2em'
+    fontSize: '2em',
+    fontFamily: `Quicksand, sans-serif`
   }
 
 
@@ -92,7 +105,6 @@ function Lobby(){
 
 
   async function initializeLobby(){
-    socket = io('/game',{transports: ['websocket'], upgrade:false})
     socket.emit('join', {gameId: gameId});
 
       try{
@@ -108,6 +120,21 @@ function Lobby(){
         setErr(e);
       }
   }
+
+  async function handleClick(){
+    const index = players.findIndex((player) => player.user_name === login.user_name)
+    if(players[index].is_host){
+      try{
+        const startReq = new ApiEndpoint(`/api/game/${gameId}/start`);
+        const startData = await startReq.postReq({name: login.user_name})
+        history.push(`/game/${gameId}`)
+      }catch(e){
+        console.log(e);
+      }
+
+    }
+  }
+
 
 
   //cdm
@@ -156,6 +183,7 @@ function Lobby(){
 
   useEffect(() => {
     if(hasEnded){
+      document.getElementById('lobbyContainer').style.filter = 'blur(1em)';
       setTimeout(() => {
         history.push('/gamesList');
       }, 2000)
@@ -170,26 +198,21 @@ function Lobby(){
     }
   }, [error])
 
-  async function handleClick(){
-    const index = players.findIndex((player) => player.user_name === login.user_name)
-    if(players[index].is_host){
-      try{
-        const startReq = new ApiEndpoint(`/api/game/${gameId}/start`);
-        const startData = await startReq.postReq({name: login.user_name})
-        history.push(`/game/${gameId}`)
-      }catch(e){
-        console.log(e);
-      }
-
+  useEffect(() => {
+    if(chatToggle){
+      document.getElementById('lobbyContainer').style.filter = 'blur(1em)';
+    }else{
+      document.getElementById('lobbyContainer').style.filter = ''
     }
-  }
+  }, [chatToggle])
+
 
 
   return(
     <React.Fragment>
-      <Button style = {buttonStyle} onClick = {leave} variant = "outlined" color = "secondary"> Quit </Button>
-      <div style = {baseContainerStyle}>
-        <h1 style = {h1Style}> Lobby </h1>
+      <div id = 'lobbyContainer' style = {baseContainerStyle}>
+        <p style = {headingStyle}> Lobby </p>
+
         <div style = {playerListStyle}>
         {
           players.map((player, index) =>
@@ -206,6 +229,10 @@ function Lobby(){
         }
         </div>
       </div>
+      
+      <Button style = {buttonStyle} onClick = {leave} variant = "outlined" color = "secondary"> Quit </Button>
+      <Button style = {chatButtonStyle} variant = 'outlined' color = {chatToggle? 'secondary': 'inherit'} onClick = {() => setChatToggle(!chatToggle)}> Chat </Button>
+      <Chat chatToggle = {chatToggle} socket = {socket} gameId = {gameId} userName = {login.user_name}/>
 
       {
         hasEnded &&

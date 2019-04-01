@@ -9,7 +9,8 @@ function Chat({chatToggle, socket, gameId, userName}){
 
   const messageContainer = {
     width: '80%',
-    fontFamily: 'Heebo sans-serif'
+    fontFamily: 'Heebo sans-serif',
+    overflowY: 'scroll'
   }
 
   const sendContainerStyle = {

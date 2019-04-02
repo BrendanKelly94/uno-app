@@ -3,6 +3,7 @@ import authStoreContext from './context/authStoreContext.js';
 import Chat from './Chat.js'
 import history from './utils/history.js';
 import Button from '@material-ui/core/Button';
+import OutlinedButton from './OutlinedButton.js';
 import TextField from '@material-ui/core/TextField';
 import ApiEndpoint from './utils/ApiEndpoint';
 import io from 'socket.io-client';
@@ -21,6 +22,10 @@ function Lobby(){
   const location = history.location.pathname.split('/');
   const gId = parseInt(location[location.length - 1], 10)
   const [ gameId, setGameId ] = useState(gId);
+
+  const lobbyContainer = useRef(null);
+  const quitButton = useRef(null);
+
   const first = null;
 
   const buttonStyle = {
@@ -183,7 +188,7 @@ function Lobby(){
 
   useEffect(() => {
     if(hasEnded){
-      document.getElementById('lobbyContainer').style.filter = 'blur(1em)';
+      lobbyContainer.current.style.filter = 'blur(1em)';
       setTimeout(() => {
         history.push('/gamesList');
       }, 2000)
@@ -200,9 +205,11 @@ function Lobby(){
 
   useEffect(() => {
     if(chatToggle){
-      document.getElementById('lobbyContainer').style.filter = 'blur(1em)';
+      lobbyContainer.current.style.filter = 'blur(1em)';
+      // quitButton.current.style.filter = 'blur(1em)';
     }else{
-      document.getElementById('lobbyContainer').style.filter = ''
+      lobbyContainer.current.style.filter = '';
+      // quitButton.current.style.filter = '';
     }
   }, [chatToggle])
 
@@ -210,7 +217,7 @@ function Lobby(){
 
   return(
     <React.Fragment>
-      <div id = 'lobbyContainer' style = {baseContainerStyle}>
+      <div ref = {lobbyContainer} style = {baseContainerStyle}>
         <p style = {headingStyle}> Lobby </p>
 
         <div style = {playerListStyle}>
@@ -229,8 +236,8 @@ function Lobby(){
         }
         </div>
       </div>
-      
-      <Button style = {buttonStyle} onClick = {leave} variant = "outlined" color = "secondary"> Quit </Button>
+
+      <Button ref = {quitButton} style = {buttonStyle} onClick = {leave} variant = "outlined" color = "secondary"> Quit </Button>
       <Button style = {chatButtonStyle} variant = 'outlined' color = {chatToggle? 'secondary': 'inherit'} onClick = {() => setChatToggle(!chatToggle)}> Chat </Button>
       <Chat chatToggle = {chatToggle} socket = {socket} gameId = {gameId} userName = {login.user_name}/>
 

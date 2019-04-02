@@ -9,14 +9,17 @@ function Chat({chatToggle, socket, gameId, userName}){
 
   const messageContainer = {
     width: '80%',
+    height: '80%',
     fontFamily: 'Heebo sans-serif',
-    overflowY: 'scroll'
+    overflowY: 'scroll',
   }
 
   const sendContainerStyle = {
     width: '100%',
     display: 'flex',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    alignSelf: 'flex-end'
+
   }
 
   const chatOverlayStyle = {
@@ -29,6 +32,7 @@ function Chat({chatToggle, socket, gameId, userName}){
     width: '100%',
     height: '100%',
     alignItems: 'center',
+    justifyContent: 'space-around',
     color: '#fff',
     transition: 'all .5 ease',
     zIndex: 10
@@ -51,8 +55,9 @@ function Chat({chatToggle, socket, gameId, userName}){
 
   return (
     <div style = {chatOverlayStyle}>
+      <div style = {messageContainer} ref = {messages}>
+      </div>
       <div style = {sendContainerStyle}>
-
         <TextField
           label="Message"
           variant = "outlined"
@@ -63,8 +68,8 @@ function Chat({chatToggle, socket, gameId, userName}){
         />
         <Button onClick = {sendMessage} color = 'primary'> Send </Button>
       </div>
-      <div style = {messageContainer} ref = {messages}>
-      </div>
+
+
     </div>
   );
 }

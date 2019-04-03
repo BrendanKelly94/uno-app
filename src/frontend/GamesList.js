@@ -57,7 +57,7 @@ function GamesList(){
   }
 
   function handleJoin(e){
-    history.push(`lobby/${e.target.id}`);
+    history.push(`lobby/${e.currentTarget.id}`);
   }
 
   async function initializeList(){

@@ -3,10 +3,11 @@ import { TweenLite, TimelineLite } from 'gsap';
 import ApiEndpoint from './utils/ApiEndpoint.js';
 import Card from './Card'
 
-const Player = React.memo(({ tl, pId, uName, playerStatus, translate, rotate, scale, turnId }) => {
+const Player = React.memo(({ tl, pId, uName, playerStatus, translate, rotate, scale, turnId, currentMessage }) => {
   const [ cardCount, setCardCount ] = useState(7);
   const [ isMyTurn, setIsMyTurn ] = useState(false);
-
+  const [ bubbleToggle, setBubbleToggle ] = useState(false);
+  const bubble = useRef(null);
   const topCard = useRef(null);
 
   const containerStyle= {
@@ -45,6 +46,17 @@ const Player = React.memo(({ tl, pId, uName, playerStatus, translate, rotate, sc
     left: '50%',
     transform: `translate(-50%, 0) rotate(${-rotate}deg)`,
     zIndex: '100'
+  }
+
+  const bubbleStyle = {
+    position: 'absolute',
+    top: '150%',
+    left: '70%',
+    transform: `rotate(${-rotate}deg)`,
+    backgroundColor: '#dddddd40',
+    borderRadius: '4px',
+    transition: 'all .5s ease',
+    opacity: 0
   }
 
   async function updatePlayerState(){
@@ -90,12 +102,24 @@ const Player = React.memo(({ tl, pId, uName, playerStatus, translate, rotate, sc
     }
   }, [turnId])
 
+  useEffect(() => {
+    if(currentMessage.userName === uName ){
+      bubble.current.style.opacity = "1"
+      setTimeout(() => {
+        bubble.current.style.opacity = "0"
+      },2000)
+    }
+  }, [currentMessage])
+
 
   const range = [...Array(cardCount)].map((_, i) => i);
   return(
     <React.Fragment>
       <div style = {containerStyle}>
         <div id = {`player-${pId}-name`} style = {nameStyle} >{uName}</div>
+        <div style = {bubbleStyle} ref = {bubble}>
+          {currentMessage.message}
+        </div>
         {
           range.map(i =>{
             if(((cardCount - 1) - i) === 0){
@@ -106,8 +130,8 @@ const Player = React.memo(({ tl, pId, uName, playerStatus, translate, rotate, sc
           })
         }
       </div>
+
     </React.Fragment>
-    //chat bubble will go here
   );
 }, (oldP, newP) => {
 

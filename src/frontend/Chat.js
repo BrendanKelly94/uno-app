@@ -2,7 +2,7 @@ import React, {useState, useRef, useEffect} from 'react';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 
-function Chat({chatToggle, socket, gameId, userName}){
+function Chat({chatToggle, socket, gameId, userName, setCurrentMessage}){
   const [ message, setMessage ] = useState('');
   const messages = useRef(null);
   const first = null
@@ -50,6 +50,7 @@ function Chat({chatToggle, socket, gameId, userName}){
         messages.current.innerHTML += `<p style = "margin-right: 2em; text-align:right">${data.user_name}: ${data.message}</p>`
       }
       setMessage('')
+      setCurrentMessage({message:data.message, userName: data.user_name});
     })
   }, [first])
 

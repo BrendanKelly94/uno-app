@@ -3,14 +3,20 @@ import Modal from '@material-ui/core/Modal';
 import Button from '@material-ui/core/Button'
 import TextField from '@material-ui/core/TextField';
 import ApiEndpoint from '../utils/ApiEndpoint.js';
+import useScale from '../utils/useScale.js';
 
 function AuthModal({ open , setOpen, login }){
   const [ auth, setAuth ] = useState({name: '', pwd: '', rePwd: ''});
   const [ reg, setReg ] = useState(false);
   const [ status , setStatus ] = useState({err: false, success: null})
+  const scaleFactor = useScale();
+  const [ width, setWidth ] = useState(scaleFactor.size < 1.2? '90%':'50%')
+
+
+
   const containerStyle = {
     position: 'absolute',
-    width: '50%',
+    width: width,
     left: '50%',
     top: '50%',
     transform: 'translate(-50%, -50%)'
@@ -21,7 +27,7 @@ function AuthModal({ open , setOpen, login }){
     display: 'flex',
     justifyContent: 'center',
     flexDirection: 'column',
-    backgroundColor: '#fff'
+    backgroundColor: '#fff',
   }
 
   const errStyle = {
@@ -90,6 +96,14 @@ function AuthModal({ open , setOpen, login }){
     }
   },[open])
 
+  useEffect(() => {
+    if(scaleFactor.size < 1.2){
+      setWidth('90%')
+    }else{
+      setWidth('50%');
+    }
+  }, [scaleFactor])
+
   const { err, success } = status;
   return(
     <Modal
@@ -106,13 +120,13 @@ function AuthModal({ open , setOpen, login }){
           </div>
           }
           <div style={modalStyle} >
-            <button onClick = {() => setOpen()}> x </button>
             <TextField
               id="user-name-input"
               label="UserName"
               margin="normal"
               variant="outlined"
               value = {auth.name}
+              style = {{margin: '.5em'}}
               onChange = {(e) => setAuth({...auth, name:e.target.value})}
             />
             <TextField
@@ -122,6 +136,7 @@ function AuthModal({ open , setOpen, login }){
               margin="normal"
               variant="outlined"
               value = {auth.pwd}
+              style = {{margin: '.5em'}}
               onChange = {(e) => setAuth({...auth, pwd:e.target.value})}
             />
             {reg && <TextField
@@ -131,6 +146,7 @@ function AuthModal({ open , setOpen, login }){
               margin="normal"
               variant="outlined"
               value = {auth.rePwd}
+              style = {{margin: '.5em'}}
               onChange = {(e) => setAuth({...auth, rePwd:e.target.value})}
               />
             }

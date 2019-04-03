@@ -30,6 +30,7 @@ function App() {
   const [ playerStatus, setPlayerStatus ] = useState({isAnimating: false, isDrawing: false, id: null});
   const [ socket, setSocket ] = useState(io('/game',{transports: ['websocket'], upgrade:false}));
   const [ chatToggle, setChatToggle ] = useState(false);
+  const [ currentMessage, setCurrentMessage ] = useState({message: '', userName: null})
   const [ hasEnded, setHasEnded] = useState(false);
   const [ wonName, setWonName ] = useState(null);
   const scaleFactor = useScale();
@@ -88,6 +89,16 @@ function App() {
 
   //functions
 
+  async function rebuildPlayers(){
+    const playersData = await new ApiEndpoint(`/api/getPlayersWithCount/${gameId}`).getReq();
+    const shift = BuildPlayers({
+      players: playersData.players,
+      username: login.user_name,
+      scaleFactor: scaleFactor
+    })
+    setShiftedPlayers(shift);
+  }
+
   async function leave(e){
       try{
         if(isHost){
@@ -96,6 +107,8 @@ function App() {
         }else{
           const leaveReq = new ApiEndpoint(`/api/game/${gameId}/leave/${myId}`);
           const leaveData = await leaveReq.postReq()
+          history.push('/gamesList');
+
         }
       }catch(e){
         console.log(e);
@@ -244,12 +257,7 @@ function App() {
 
   //re-render players when scaleFactor changes
   useEffect(() => {
-    const shift = BuildPlayers({
-      players: players,
-      username: login.user_name,
-      scaleFactor: scaleFactor
-    })
-    setShiftedPlayers(shift);
+    rebuildPlayers();
   },[scaleFactor])
 
   //animate player's new card to middle
@@ -339,6 +347,7 @@ function App() {
               translate = {player.translate}
               rotate = {player.rotate}
               scale = {scaleFactor.size}
+              currentMessage = {currentMessage}
             />
           )
         }
@@ -381,10 +390,10 @@ function App() {
           }}
         />
       </div>
-      
+
       <Button style = {buttonStyle} onClick = {leave} variant = "outlined" color = "secondary"> Quit </Button>
       <Button style = {chatButtonStyle} variant = 'outlined' color = {chatToggle? 'secondary': 'inherit'} onClick = {() => setChatToggle(!chatToggle)}> Chat </Button>
-      <Chat chatToggle = {chatToggle} socket = {socket} gameId = {gameId} userName = {login.user_name}/>
+      <Chat chatToggle = {chatToggle} socket = {socket} gameId = {gameId} userName = {login.user_name} setCurrentMessage = {setCurrentMessage}/>
 
       {
         hasEnded?

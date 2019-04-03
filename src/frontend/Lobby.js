@@ -3,7 +3,6 @@ import authStoreContext from './context/authStoreContext.js';
 import Chat from './Chat.js'
 import history from './utils/history.js';
 import Button from '@material-ui/core/Button';
-import OutlinedButton from './OutlinedButton.js';
 import TextField from '@material-ui/core/TextField';
 import ApiEndpoint from './utils/ApiEndpoint';
 import io from 'socket.io-client';
@@ -231,15 +230,15 @@ function Lobby(){
 
         {
           isHost?
-          <Button style = {{marginTop: '2em'}} onClick = {handleClick} variant = "outlined" color = "inherit"> Start Game </Button>
-          :<Button disabled variant = "outlined" color = "disabled"> Start Game </Button>
+          <Button style = {{marginTop: '2em', position: 'relative'}} onClick = {handleClick} variant = "outlined" color = "#020202"> Start Game </Button>
+          :<Button disabled variant = "outlined" color = "#dddddd"> Start Game </Button>
         }
         </div>
       </div>
 
-      <Button ref = {quitButton} style = {buttonStyle} onClick = {leave} variant = "outlined" color = "secondary"> Quit </Button>
-      <Button style = {chatButtonStyle} variant = 'outlined' color = {chatToggle? 'secondary': 'inherit'} onClick = {() => setChatToggle(!chatToggle)}> Chat </Button>
-      <Chat chatToggle = {chatToggle} socket = {socket} gameId = {gameId} userName = {login.user_name}/>
+      <Button ref = {quitButton} variant = 'outlined' style = {buttonStyle} onClick = {leave} color = "secondary"> QUIT </Button>
+      <Button style = {chatButtonStyle} variant = 'outlined' color = {chatToggle? 'secondary': 'default'} onClick = {() => setChatToggle(!chatToggle)}> CHAT </Button>
+      <Chat chatToggle = {chatToggle} socket = {socket} gameId = {gameId} userName = {login.user_name} setCurrentMessage = {() => true}/>
 
       {
         hasEnded &&

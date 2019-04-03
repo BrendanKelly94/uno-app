@@ -6,7 +6,7 @@ module.exports = {
       connection: {
           database: 'uno_test',
           user:     'brendan',
-          password: 'Brendan1'
+          password: 'Brenan1'
       },
       migrations: {
         directory: __dirname + '/db/migrations'

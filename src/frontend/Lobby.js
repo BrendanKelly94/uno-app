@@ -5,6 +5,7 @@ import history from './utils/history.js';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import ApiEndpoint from './utils/ApiEndpoint';
+import useScale from './utils/useScale.js'
 import io from 'socket.io-client';
 
 function Lobby(){
@@ -17,7 +18,7 @@ function Lobby(){
   const [ myId, setMyId ] = useState(null);
   const [ socket, setSocket ] = useState(io('/game',{transports: ['websocket'], upgrade:false}));
   const [ chatToggle, setChatToggle ] = useState(false);
-
+  const scaleFactor = useScale();
   const location = history.location.pathname.split('/');
   const gId = parseInt(location[location.length - 1], 10)
   const [ gameId, setGameId ] = useState(gId);
@@ -238,7 +239,7 @@ function Lobby(){
 
       <Button ref = {quitButton} variant = 'outlined' style = {buttonStyle} onClick = {leave} color = "secondary"> QUIT </Button>
       <Button style = {chatButtonStyle} variant = 'outlined' color = {chatToggle? 'secondary': 'default'} onClick = {() => setChatToggle(!chatToggle)}> CHAT </Button>
-      <Chat chatToggle = {chatToggle} socket = {socket} gameId = {gameId} userName = {login.user_name} setCurrentMessage = {() => true}/>
+      <Chat chatToggle = {chatToggle} socket = {socket} gameId = {gameId} userName = {login.user_name} scale = {scaleFactor.size} setCurrentMessage = {() => true}/>
 
       {
         hasEnded &&

@@ -56,7 +56,7 @@ function Home(){
     if(!context.user_name){
       setAuth(!auth);
     }else{
-      const newGameData = await new ApiEndpoint('/api/newGame').postReq({botFill: true})
+      const newGameData = await new ApiEndpoint('/api/newGame').postReq({botFill: true, userName: context.user_name})
       if(newGameData.hasOwnProperty('err')){
         // setError(newGameData.err)
         console.log('err')

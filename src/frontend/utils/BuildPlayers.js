@@ -9,7 +9,7 @@ function BuildPlayers({ players, username, scaleFactor}){
   temp.shift();
   //set translate, rotate, and scale
   for(let i = 0; i < temp.length; i++){
-    temp[i].translate = {x: (window.innerWidth * scaleFactor.x) * Math.cos(-Math.PI/(temp.length - 1) * i), y: (window.innerHeight * scaleFactor.y) * Math.sin(-Math.PI/(temp.length - 1) * i) }
+    temp[i].translate = {x: (window.innerWidth * scaleFactor.x) * Math.cos(-Math.PI/(temp.length - 1) * i) + (50 * scaleFactor.x), y: (window.innerHeight * scaleFactor.y) * Math.sin(-Math.PI/(temp.length - 1) * i) }
     temp[i].rotate = 90 - 180/(temp.length - 1) * i;
     temp[i].scale = scaleFactor.size;
   }

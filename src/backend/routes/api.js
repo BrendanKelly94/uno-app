@@ -63,7 +63,12 @@ router.get('/getHand/:playerId', async (req, res, next) => {
 //create game
 router.post('/newGame', async (req, res, next) => {
   const botFill = req.body.botFill;
+  const userName = req.body.userName;
   try{
+    const player = await queries.findPlayer({name: userName});
+    if(player.length > 0){
+      const remove = await queries.removeGame({gameId: player[0].game_id})
+    }
     const id = await queries.createGame({botFill: botFill});
     const x = await queries.generateDeck({gameId: id[0]});
 

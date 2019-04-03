@@ -393,7 +393,7 @@ function App() {
 
       <Button style = {buttonStyle} onClick = {leave} variant = "outlined" color = "secondary"> Quit </Button>
       <Button style = {chatButtonStyle} variant = 'outlined' color = {chatToggle? 'secondary': 'inherit'} onClick = {() => setChatToggle(!chatToggle)}> Chat </Button>
-      <Chat chatToggle = {chatToggle} socket = {socket} gameId = {gameId} userName = {login.user_name} setCurrentMessage = {setCurrentMessage}/>
+      <Chat chatToggle = {chatToggle} socket = {socket} gameId = {gameId} userName = {login.user_name} scale = {scaleFactor.size} setCurrentMessage = {setCurrentMessage}/>
 
       {
         hasEnded?

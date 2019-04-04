@@ -212,7 +212,6 @@ function App() {
             if(data.newCards.status){
               await cardsGiven({playerId:data.newCards.id, myId: myId});
             }
-              console.log(data)
               if(data.hasDrawn){
                 setPlayerStatus({id: data.lastTurn, isAnimating: false, isDrawing: true})
               }

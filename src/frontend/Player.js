@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { TweenLite, TimelineLite } from 'gsap';
 import ApiEndpoint from './utils/ApiEndpoint.js';
 import Card from './Card'
+import PlayerIndicator from './PlayerIndicator.js'
+import ChatBubble from './ChatBubble.js'
 
 const Player = React.memo(({ tl, pId, uName, playerStatus, translate, rotate, scale, turnId, currentMessage }) => {
   const [ cardCount, setCardCount ] = useState(7);
@@ -18,45 +20,21 @@ const Player = React.memo(({ tl, pId, uName, playerStatus, translate, rotate, sc
     left: `calc(50% - 5em)`,
     top: `calc(50% - 3.563em)`,
     transform: `translate(${translate.x}px, ${translate.y}px)rotate(${rotate}deg)scale(${scale})`,
-    backgroundColor: (isMyTurn)? '#00ffed': '#fff',
-    boxShadow: (isMyTurn)? '0px 0px 40px 20px #00ffed': '',
-    zIndex: (isMyTurn)? '1':'0',
+    backgroundColor: '#fff',
     transition: 'all .5s ease'
-  }
-
-  const indicatorStyle = {
-    width: '1em',
-    heigh: '1em',
-    borderRadius: '50%',
-    backgroundColor: '#000',
-    position: 'absolute',
-    top: '110%',
-    left: '50%',
-    transform: 'translate(-50%,0)',
-    zIndex: '100'
   }
 
   const nameStyle = {
     position: 'absolute',
     backgroundColor: '#000',
     color: '#fff',
+    fontSize: '1em',
     paddingLeft: '5%',
     paddingRight: '5%',
     top: '120%',
     left: '50%',
     transform: `translate(-50%, 0) rotate(${-rotate}deg)`,
     zIndex: '100'
-  }
-
-  const bubbleStyle = {
-    position: 'absolute',
-    top: '150%',
-    left: '70%',
-    transform: `rotate(${-rotate}deg)`,
-    backgroundColor: '#dddddd40',
-    borderRadius: '4px',
-    transition: 'all .5s ease',
-    opacity: 0
   }
 
   async function updatePlayerState(){
@@ -116,10 +94,9 @@ const Player = React.memo(({ tl, pId, uName, playerStatus, translate, rotate, sc
   return(
     <React.Fragment>
       <div style = {containerStyle}>
+        <PlayerIndicator isMyTurn = {isMyTurn} scale = {scale} />
         <div id = {`player-${pId}-name`} style = {nameStyle} >{uName}</div>
-        <div style = {bubbleStyle} ref = {bubble}>
-          {currentMessage.message}
-        </div>
+        <ChatBubble ref = {bubble} message = {currentMessage.message} rotate = {rotate}/>
         {
           range.map(i =>{
             if(((cardCount - 1) - i) === 0){

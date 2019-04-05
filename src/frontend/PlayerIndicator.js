@@ -2,7 +2,7 @@ import React, {useRef, useEffect} from 'react';
 import ReactDOM from 'react-dom'
 function PlayerIndicator({isMyTurn, scale}){
   const circleRef = useRef(null);
-  const size = 200 * scale;
+  const size = 150 * scale;
   useEffect(() => {
     const element = ReactDOM.findDOMNode(circleRef.current);
     element.setAttribute('stroke-dashoffset',isMyTurn? 0: size * (Math.PI * 2))
@@ -30,7 +30,8 @@ function PlayerIndicator({isMyTurn, scale}){
         position: 'absolute',
         left: '50%',
         top:'50%',
-        transform:'translate(-50%,-50%)'
+        transform:'translate(-50%,-50%)',
+        zIndex: isMyTurn? 1: 0
       }}
       ref = {circleRef}
     >

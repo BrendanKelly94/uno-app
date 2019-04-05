@@ -43,8 +43,6 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
     backgroundColor: 'transparent'
   }
 
-  // const tl = new TimelineLite;
-
   function handleOptionClick(e){
     if(!isAnimating && isMyTurn && !hasDrawn.status && !hasSubmitted){
       const eId = e.currentTarget.id;
@@ -199,7 +197,6 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
 
       <div style = {drawBoxStyle} onClick = {handleDrawClick}></div>
       <ColorChanger changeColor = {handleColorChange} toggle = {colorChange.status} handRef = {handRef}/>
-
     </React.Fragment>
   );
 }, (oldP, newP) => {

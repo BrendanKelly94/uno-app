@@ -21,7 +21,8 @@ const Player = React.memo(({ tl, pId, uName, playerStatus, translate, rotate, sc
     top: `calc(50% - 3.563em)`,
     transform: `translate(${translate.x}px, ${translate.y}px)rotate(${rotate}deg)scale(${scale})`,
     backgroundColor: '#fff',
-    transition: 'all .5s ease'
+    transition: 'all .5s ease',
+    zIndex: isMyTurn? 1:0
   }
 
   const nameStyle = {

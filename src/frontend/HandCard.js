@@ -3,7 +3,7 @@ import React from 'react';
 const HandCard = React.forwardRef(({ value, color , style, cId, cClass, submitCard }, ref) => {
   const ellipseStyle = {
     fill: '#fff',
-    strokeWidth: '1',
+    strokeWidth: '2',
     stroke: color,
     transformOrigin: 'center',
     transform: 'rotate(-60deg)'

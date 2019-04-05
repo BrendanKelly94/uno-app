@@ -1,0 +1,58 @@
+import React, {useRef, useEffect} from 'react';
+import Card from './Card.js';
+
+function ColorChanger({changeColor, toggle, handRef}){
+  const colors = ['red','blue', 'green', 'yellow'];
+  const containerRef = useRef(null);
+  const containerStyle = {
+      position: 'absolute',
+      padding: '1em',
+      width: '50%',
+      left: '50%',
+      bottom: '3%',
+      transform: 'translate(-50%, 0)',
+      display: toggle?'flex':'none',
+      justifyContent: 'space-evenly',
+      alignItems: 'center',
+      backgroundColor: 'transparent',
+      zIndex: 10,
+  }
+
+  const selectionStyle = {
+    zIndex: 10,
+    width: '3em',
+    height: '3em',
+    borderRadius: '50%'
+
+  }
+
+  function mouseEnter(e){
+    const color = e.target.id
+    e.target.style.boxShadow = `0 0 1em 1em ${color}`;
+  }
+
+  function mouseLeave(e){
+    e.target.style.boxShadow = '';
+  }
+
+  useEffect(() => {
+    if(toggle){
+      handRef.current.style.filter = 'blur(1em)';
+    }else{
+      handRef.current.style.filter = '';
+    }
+  }, [toggle])
+
+  return(
+    <React.Fragment>
+      <div style = {containerStyle} ref = {containerRef}>
+        {colors.map((color) =>
+          <div key = {color} id = {color} onClick = {() => changeColor(color)} onMouseEnter = {mouseEnter} onMouseLeave = {mouseLeave} style = {{...selectionStyle, backgroundColor: color}}></div>
+        )}
+      </div>
+
+    </React.Fragment>
+  );
+}
+
+export default ColorChanger;

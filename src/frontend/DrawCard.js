@@ -11,8 +11,6 @@ const DrawCard = React.memo(({ tl, playerStatus, myId, scaleFactor, isMyTurn}) =
 
   useEffect(() => {
     if(!isFirst && playerStatus.isDrawing){
-      console.log(playerStatus.isDrawing)
-
       const target = document.getElementById(`player-${playerStatus.id}-card-0`);
       const sBox = source.current.getBoundingClientRect();
       const tBox = target.getBoundingClientRect();
@@ -43,7 +41,6 @@ const DrawCard = React.memo(({ tl, playerStatus, myId, scaleFactor, isMyTurn}) =
         glowTl.play();
       }else{
         if(!isFirst){
-          console.log('pause')
           glowTl.restart()
           glowTl.pause();
         }

@@ -1,7 +1,8 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect, useRef } from 'react';
 import gameStoreContext from './context/gameStoreContext';
 import ApiEndpoint from './utils/ApiEndpoint';
 import HandCard from './HandCard';
+import ColorChanger from './ColorChanger.js'
 import Card from './Card';
 import gsap from 'gsap';
 import history from './utils/history';
@@ -13,6 +14,8 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
   const [ hasDrawn, setHasDrawn ] = useState({status:false, card: null});
   const [ colorChange, setColorChange ] = useState({status:false, cardId: null});
   const [ hasSubmitted, setHasSubmitted ] = useState(false);
+
+  const handRef = useRef(null);
 
   const location = history.location.pathname.split('/');
   const gameId = location[location.length - 1];
@@ -27,23 +30,8 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
     transition: 'all .5s ease',
     backgroundColor: (isMyTurn)? '#00ffed': '#fff',
     boxShadow: (isMyTurn)? '0px 0px 40px 20px #00ffed': '',
+    transition: 'filter .5 ease'
   };
-
-
-
-  const cChangeContainerStyle = {
-      position: 'absolute',
-      width: '50%',
-      height: '50%',
-      left: '50%',
-      top: '50%',
-      transform: 'translate(-50%, -50%)',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: 'grey',
-      zIndex: 10
-  }
 
   const drawBoxStyle = {
     position: 'absolute',
@@ -99,9 +87,7 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
     }
   }
 
-  function handleColorChange(e){
-    const eId = e.target.id;
-    const color = eId.split('-')[1];
+  function handleColorChange(color){
     submitCardAction({cardId: colorChange.cardId, color: color, hasDrawn: hasDrawn.status})
     setColorChange({status: false, cardId: null})
   }
@@ -193,7 +179,7 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
 
   return(
     <React.Fragment>
-      <div id = {`player-${myId}-card-0`} style = {containerStyle}>
+      <div id = {`player-${myId}-card-0`} style = {containerStyle} ref = {handRef}>
         {
           hand.map((item, i) =>
             <HandCard
@@ -209,21 +195,12 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
             />
           )
       }
-    </div>
+      </div>
 
-    <div style = {drawBoxStyle} onClick = {handleDrawClick}></div>
+      <div style = {drawBoxStyle} onClick = {handleDrawClick}></div>
+      <ColorChanger changeColor = {handleColorChange} toggle = {colorChange.status} handRef = {handRef}/>
 
-    {
-     colorChange.status?
-     <div style = {cChangeContainerStyle}>
-       <Card callback = {handleColorChange} cId = 'color-red' style = {{backgroundColor: 'red', zIndex: 10}}/>
-       <Card callback = {handleColorChange} cId = 'color-blue' style = {{backgroundColor: 'blue', zIndex: 10}}/>
-       <Card callback = {handleColorChange} cId = 'color-green' style = {{backgroundColor: 'green', zIndex: 10}}/>
-       <Card callback = {handleColorChange} cId = 'color-yellow' style = {{backgroundColor: 'yellow', zIndex: 10}}/>
-     </div>
-     :null
-   }
-     </React.Fragment>
+    </React.Fragment>
   );
 }, (oldP, newP) => {
 

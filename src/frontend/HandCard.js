@@ -49,6 +49,8 @@ const HandCard = React.memo(React.forwardRef(({ value, color , style, cId, cClas
 }), (oldP, newP) => {
   if(oldP.color !== newP.color && oldP.value !== newP.value && (newP.cId === 'new' || newP.cId === 'card-in-play')){
     return false;
+  }else if((newP.cId !== 'new' || newP.cId !== 'card-in-play') && newP.submitCard !== oldP.submitCard){
+    return false;
   }else{
     return true;
   }

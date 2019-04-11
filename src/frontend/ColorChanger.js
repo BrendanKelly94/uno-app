@@ -37,7 +37,7 @@ function ColorChanger({changeColor, toggle, handRef}){
 
   useEffect(() => {
     if(toggle){
-      handRef.current.style.filter = 'blur(1em)';
+      handRef.current.style.filter = 'blur(.3em)';
     }else{
       handRef.current.style.filter = '';
     }

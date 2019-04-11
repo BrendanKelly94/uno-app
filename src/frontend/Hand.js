@@ -20,13 +20,6 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
   const location = history.location.pathname.split('/');
   const gameId = location[location.length - 1];
 
-  const colorEnum = {
-    "red": "#FF4747",
-    "yellow": '#FFFF87',
-    "green": '#ACDB85',
-    "blue": '#84BAB7'
-  }
-
   const containerStyle = {
     position: 'absolute',
     left: '50%',

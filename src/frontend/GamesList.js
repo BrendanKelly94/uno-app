@@ -28,6 +28,8 @@ function GamesList(){
 
   const baseContainerStyle = {
     position: 'absolute',
+    top: 0,
+    left: 0,
     width: '100%',
     height: '100%',
     left: '50%',
@@ -36,7 +38,8 @@ function GamesList(){
     flexDirection: 'column',
     alignItems: 'center',
     backgroundColor: '#222725',
-    color: '#fff'
+    color: '#fff',
+
   }
 
   const gameListingStyle = {

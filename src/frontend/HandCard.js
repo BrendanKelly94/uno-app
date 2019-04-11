@@ -1,6 +1,6 @@
 import React, {useEffect} from 'react';
 
-const HandCard = React.forwardRef(({ value, color , style, cId, cClass, submitCard }, ref) => {
+const HandCard = React.memo(React.forwardRef(({ value, color , style, cId, cClass, submitCard }, ref) => {
 
   const colorEnum = {
     "red": "#FF4747",
@@ -46,6 +46,12 @@ const HandCard = React.forwardRef(({ value, color , style, cId, cClass, submitCa
 
     </svg>
   )
+}), (oldP, newP) => {
+  if(oldP.color !== newP.color && oldP.value !== newP.value && (newP.cId === 'new' || newP.cId === 'card-in-play')){
+    return false;
+  }else{
+    return true;
+  }
 });
 
 export default HandCard;

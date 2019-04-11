@@ -51,7 +51,7 @@ function Lobby(){
     flexDirection: 'column',
     alignItems: 'center',
     backgroundColor: '#222725',
-    color: '#fff'
+    color: '#fff',
   }
 
   const playerListStyle = {

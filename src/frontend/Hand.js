@@ -20,6 +20,13 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
   const location = history.location.pathname.split('/');
   const gameId = location[location.length - 1];
 
+  const colorEnum = {
+    "red": "#FF4747",
+    "yellow": '#FFFF87',
+    "green": '#ACDB85',
+    "blue": '#84BAB7'
+  }
+
   const containerStyle = {
     position: 'absolute',
     left: '50%',
@@ -28,8 +35,8 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
     display: 'flex',
     justifyContent: 'center',
     transition: 'all .5s ease',
-    backgroundColor: (isMyTurn)? '#00ffed': '#fff',
-    boxShadow: (isMyTurn)? '0px 0px 40px 20px #00ffed': '',
+    // backgroundColor: (isMyTurn)? '#00ffed':'#fff',
+    // boxShadow: (isMyTurn)? '0px 0px 40px 20px #00ffed': '',
     transition: 'filter .5 ease'
   };
 
@@ -182,8 +189,8 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
           hand.map((item, i) =>
             <HandCard
               key = {'hand-'+item.id}
-              value = {item.value}
               color = {item.color}
+              value = {item.value}
               cId = {`hand-${item.id}`}
               cClass = {'hand-card'}
               style = {{

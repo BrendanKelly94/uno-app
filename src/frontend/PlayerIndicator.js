@@ -27,6 +27,7 @@ function PlayerIndicator({isMyTurn, scale}){
       strokeLinecap = "round"
       style={{
         transition: 'stroke-dashoffset 1s ease',
+        stroke: '#fff',
         position: 'absolute',
         left: '50%',
         top:'50%',
@@ -42,7 +43,7 @@ function PlayerIndicator({isMyTurn, scale}){
             stopColor="#ffffff"
             stopOpacity="0"
           />
-          <stop offset="100%" stopColor="rgb(0,255,229)" stopOpacity="0">
+          <stop offset="100%" stopColor="#FFFFC7" stopOpacity="0">
             <animate
               attributeName="stop-opacity"
               values="1; 0; 1"

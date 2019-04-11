@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import history from './utils/history.js';
 import ApiEndpoint from './utils/ApiEndpoint.js'
-import Button from '@material-ui/core/Button';
+import Button from './Button';
 
 
 function GamesList(){
@@ -34,7 +34,9 @@ function GamesList(){
     transform: 'translate(-50%,0)',
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'center'
+    alignItems: 'center',
+    backgroundColor: '#222725',
+    color: '#fff'
   }
 
   const gameListingStyle = {
@@ -79,7 +81,7 @@ function GamesList(){
   const { games, error } = state;
   return(
     <React.Fragment>
-      <Button style = {buttonStyle} onClick = {navigateBack} variant = "outlined" color = "secondary"> Back </Button>
+      <Button style = {buttonStyle} onClick = {navigateBack} variant = "outlined" color = "#FF0000"> BACK </Button>
       <div style = {baseContainerStyle}>
         <p style = {headingStyle}>Available Games</p>
         <div style = {listContainerStyle}>
@@ -95,7 +97,7 @@ function GamesList(){
               <div>{game.id}</div>
               <div>{game.bot_fill?'Yes':'No'}</div>
               <div>{game.player_count}/6</div>
-              <Button id = {game.id} onClick = {handleJoin} variant = "contained" color = "primary">Join</Button>
+              <Button id = {game.id} onClick = {handleJoin} variant = "default" color = "#C9DBBA">Join</Button>
             </div>
           )
           }

@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 import AuthModal from './modals/AuthModal';
 import CreateModal from './modals/CreateModal';
 import authStoreContext from './context/authStoreContext';
-import Button from '@material-ui/core/Button';
+import Button from './Button';
 import history from './utils/history.js';
 import ApiEndpoint from './utils/ApiEndpoint.js';
 
@@ -16,7 +16,8 @@ function Home(){
     marginBottom: '2em',
     marginTop: '2em',
     fontSize: '4em',
-    fontFamily: `Quicksand, sans-serif`
+    fontFamily: `Quicksand, sans-serif`,
+    color: '#fff'
   }
 
   const navbarStyle = {
@@ -27,14 +28,24 @@ function Home(){
     alignItems: 'center'
   }
 
-  const baseContainerStyle = {
+  const homeContainerStyle = {
     position: 'absolute',
     height: '80%',
     left: '50%',
     transform: 'translate(-50%,0)',
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'center'
+    alignItems: 'center',
+    backgroundColor: 'transparent'
+  }
+
+  const baseContainerStyle = {
+    position: 'absolute',
+    left: '0',
+    top: '0',
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#222725'
   }
 
   const buttonContainerStyle = {
@@ -72,19 +83,21 @@ function Home(){
 
   return(
     <React.Fragment>
-      <div style = {navbarStyle}>
-        {
-          context.user_name?
-          <p style = {{fontFamily: 'Heebo sans-serif'}}>{context.user_name}</p>
-          :<Button color = "primary" onClick = {() => setAuth(!auth)}>login</Button>
-        }
-      </div>
       <div style = {baseContainerStyle}>
-        <p style = {headingStyle}>UNO</p>
-        <div style = {buttonContainerStyle}>
-          <Button id = 'join-button' variant = "contained" color = "primary" onClick = {handleJoin}>Join Game</Button>
-          <Button id = 'create-button' variant = "contained" color = "primary" onClick = {handleCreate}>Create Game</Button>
-          <AuthModal open = {auth} setOpen = {() => setAuth(!auth)} login = {login}/>
+        <div style = {navbarStyle}>
+          {
+            context.user_name?
+            <p style = {{fontFamily: 'Quicksand, sans-serif', color: '#fff', marginRight: '.2em'}}>{context.user_name}</p>
+            :<Button color = "#AAAAAA" onClick = {() => setAuth(!auth)}>login</Button>
+          }
+        </div>
+        <div style = {homeContainerStyle}>
+          <p style = {headingStyle}>UNO</p>
+          <div style = {buttonContainerStyle}>
+            <Button id = 'join-button' variant = "default" color = "#C9DBBA" onClick = {handleJoin}>JOIN GAME</Button>
+            <Button id = 'create-button' variant = "default" color = "#C9DBBA" onClick = {handleCreate}>CREATE GAME</Button>
+            <AuthModal open = {auth} setOpen = {() => setAuth(!auth)} login = {login}/>
+          </div>
         </div>
       </div>
     </React.Fragment>

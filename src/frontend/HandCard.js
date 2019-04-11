@@ -1,12 +1,12 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 
 const HandCard = React.forwardRef(({ value, color , style, cId, cClass, submitCard }, ref) => {
-  const ellipseStyle = {
-    fill: '#fff',
-    strokeWidth: '2',
-    stroke: color,
-    transformOrigin: 'center',
-    transform: 'rotate(-60deg)'
+
+  const colorEnum = {
+    "red": "#FF4747",
+    "yellow": '#FFFF87',
+    "green": '#ACDB85',
+    "blue": '#84BAB7'
   }
 
   let item = value;
@@ -31,27 +31,32 @@ const HandCard = React.forwardRef(({ value, color , style, cId, cClass, submitCa
     break;
   }
 
+
   return(
     <svg ref = {ref} id = {cId? cId: ''} className = {cClass? cClass: ''} onClick = {submitCard?submitCard: () => true} viewBox="0 0 50 70" width = "50" height = "70" style = {style? style: {}} xmlns="http://www.w3.org/2000/svg" >
-
-      <rect x="1" y="1" width="48" height="68" rx="5" ry="5" style = {{fill:'#fff',strokeWidth:'1', stroke:'#000'}}/>
-      {
-        (value <= 9)?
-        <React.Fragment>
-          <text x = "5%" y= "5%" dominantBaseline = "hanging"> {item} </text>
-          <text x = "80%" y = "95%" dominantBaseline = "baseline"> {item} </text>
-        </React.Fragment>
-        :null
-      }
-
-
-      <svg width="50" height="70">
-        <ellipse cx="50%" cy="50%" rx="30" ry="15" style = {ellipseStyle}/>
-        <text dominantBaseline="middle" textAnchor = "middle" x = "50%" y = "50%"> {item} </text>
-      </svg>
+      <defs>
+        <linearGradient id={`${color}-grad`} x1="0%" y1="20%" x2="100%" y2="80%" >
+          <stop offset="0%" stopColor = {'#ffffff'} stopOpacity = {1}/>
+          <stop offset="10%" stopColor = {'#ffffff'} stopOpacity = {1}/>
+          <stop offset="100%" stopColor = {colorEnum[color]} stopOpacity = {1} />
+        </linearGradient>
+      </defs>
+      <rect x="1" y="1" width="48" height="68" rx="5" ry="5" style = {{fill:`url(#${color}-grad)`,strokeWidth:'1', stroke:'#000'}}/>
+      <text x = "5%" y= "5%" dominantBaseline = "hanging" style = {{fontFamily: `Quicksand, sans-serif`}}> {item} </text>
 
     </svg>
   )
 });
 
 export default HandCard;
+
+// {
+//   (value <= 9)?
+//   <React.Fragment>
+//     <text x = "5%" y= "5%" dominantBaseline = "hanging"> {item} </text>
+//     <text x = "80%" y = "95%" dominantBaseline = "baseline"> {item} </text>
+//   </React.Fragment>
+//   :null
+// }
+
+// <text dominantBaseline="middle" textAnchor = "middle" x = "50%" y = "50%"> {item} </text>

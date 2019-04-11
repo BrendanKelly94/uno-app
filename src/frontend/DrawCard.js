@@ -29,7 +29,7 @@ const DrawCard = React.memo(({ tl, playerStatus, myId, scaleFactor, isMyTurn}) =
 
     }else{
       if(isFirst){
-        glowTl.to(glowSource.current, 1, {backgroundColor: "#e2ddff"})
+        glowTl.to(glowSource.current, 1, {backgroundColor: "#87A399"})
         setIsFirst(false);
       }
     }

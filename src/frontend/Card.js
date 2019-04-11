@@ -9,7 +9,7 @@ const Card = React.forwardRef(({ cId, style, callback }, ref) => {
     boxSizing: 'border-box',
     border: '1px #000 solid',
     borderRadius: '5px',
-    backgroundColor: 'blue',
+    backgroundColor: '#D3FFEF',
   }
   return(
     <div id = {cId?cId:''} ref = {ref} onClick = {callback? callback: () => true}style = {style?{...cardStyle, ...style}:cardStyle}></div>

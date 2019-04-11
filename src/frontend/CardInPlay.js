@@ -11,6 +11,13 @@ function CardInPlay({ card }){
     width: '50px'
   }
 
+  const colorEnum = {
+    "red": "#FF4747",
+    "yellow": '#FFFF87',
+    "green": '#ACDB85',
+    "blue": '#84BAB7'
+  }
+
   //add new card to background with corresponding variance
   useEffect(() => {
     if(!isFirst){

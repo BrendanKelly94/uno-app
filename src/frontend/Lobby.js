@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext, useRef } from 'react';
 import authStoreContext from './context/authStoreContext.js';
 import Chat from './Chat.js'
 import history from './utils/history.js';
-import Button from '@material-ui/core/Button';
+import Button from './Button';
 import TextField from '@material-ui/core/TextField';
 import ApiEndpoint from './utils/ApiEndpoint';
 import useScale from './utils/useScale.js'
@@ -49,7 +49,9 @@ function Lobby(){
     left: 0,
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'center'
+    alignItems: 'center',
+    backgroundColor: '#222725',
+    color: '#fff'
   }
 
   const playerListStyle = {
@@ -79,7 +81,7 @@ function Lobby(){
   const headingStyle = {
     textAlign: 'center',
     marginBottom: '2em',
-    marginTop: '2em',
+    marginTop: '4em',
     fontSize: '2em',
     fontFamily: `Quicksand, sans-serif`
   }
@@ -231,14 +233,14 @@ function Lobby(){
 
         {
           isHost?
-          <Button style = {{marginTop: '2em', position: 'relative'}} onClick = {handleClick} variant = "outlined" color = "#020202"> Start Game </Button>
-          :<Button disabled variant = "outlined" color = "#dddddd"> Start Game </Button>
+          <Button style = {{marginTop: '2em', position: 'relative'}} onClick = {handleClick} variant = "outlined" color = "#ffffff"> Start Game </Button>
+          :null
         }
         </div>
       </div>
 
-      <Button ref = {quitButton} variant = 'outlined' style = {buttonStyle} onClick = {leave} color = "secondary"> QUIT </Button>
-      <Button style = {chatButtonStyle} variant = 'outlined' color = {chatToggle? 'secondary': 'default'} onClick = {() => setChatToggle(!chatToggle)}> CHAT </Button>
+      <Button ref = {quitButton} variant = 'outlined' style = {buttonStyle} onClick = {leave} color = "#FF0000"> QUIT </Button>
+      <Button style = {chatButtonStyle} variant = 'outlined' color = {chatToggle? '#FF0000': '#AAAAAA'} onClick = {() => setChatToggle(!chatToggle)}> CHAT </Button>
       <Chat chatToggle = {chatToggle} socket = {socket} gameId = {gameId} userName = {login.user_name} scale = {scaleFactor.size} setCurrentMessage = {() => true}/>
 
       {

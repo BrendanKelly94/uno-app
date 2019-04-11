@@ -8,7 +8,7 @@ import FindInitTransform from './utils/FindInitTransform';
 import InitialState from './utils/InitialState';
 import ApiEndpoint from './utils/ApiEndpoint';
 import Chat from './Chat.js'
-import Button from '@material-ui/core/Button';
+import Button from './Button';
 import Player from './Player';
 import CardInPlay from './CardInPlay';
 import Hand from './Hand'
@@ -41,13 +41,22 @@ function App() {
 
   const tl = new TimelineMax;
 
+  const colorEnum = {
+    "red": "#FF4747",
+    "yellow": '#FFFF87',
+    "green": '#ACDB85',
+    "blue": '#84BAB7'
+  }
+
   const baseContainerStyle = {
     position: 'absolute',
     height: '100%',
     width: '100%',
     top: 0,
     left: 0,
-    transition: 'filter .5 ease'
+    transition: 'filter .5 ease',
+    backgroundColor: '#222725',
+    overflowX: 'hidden'
   }
 
   const middleStyle = {
@@ -84,7 +93,7 @@ function App() {
     width: '50%',
     height: '50%',
     backgroundColor: 'transparent',
-    color: '#000',
+    color: '#fff',
     fontSize: '2em'
   }
 
@@ -391,8 +400,8 @@ function App() {
         />
       </div>
 
-      <Button style = {buttonStyle} onClick = {leave} variant = "outlined" color = "secondary"> Quit </Button>
-      <Button style = {chatButtonStyle} variant = 'outlined' color = {chatToggle? 'secondary': 'inherit'} onClick = {() => setChatToggle(!chatToggle)}> Chat </Button>
+      <Button style = {buttonStyle} onClick = {leave} variant = "outlined" color = "#FF0000"> QUIT </Button>
+      <Button style = {chatButtonStyle} variant = 'outlined' color = {chatToggle? '#FF0000': '#AAAAAA'} onClick = {() => setChatToggle(!chatToggle)}> CHAT </Button>
       <Chat chatToggle = {chatToggle} socket = {socket} gameId = {gameId} userName = {login.user_name} scale = {scaleFactor.size} setCurrentMessage = {setCurrentMessage}/>
 
       {

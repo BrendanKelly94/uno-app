@@ -20,8 +20,7 @@ const Player = React.memo(({ tl, pId, uName, playerStatus, translate, rotate, sc
     left: `calc(50% - 5em)`,
     top: `calc(50% - 3.563em)`,
     transform: `translate(${translate.x}px, ${translate.y}px)rotate(${rotate}deg)scale(${scale})`,
-    backgroundColor: '#fff',
-    transition: 'all .5s ease',
+    backgroundColor: 'transparent',
     zIndex: isMyTurn? 1:0
   }
 
@@ -30,6 +29,7 @@ const Player = React.memo(({ tl, pId, uName, playerStatus, translate, rotate, sc
     backgroundColor: '#000',
     color: '#fff',
     fontSize: '1em',
+    fontFamily: `Quicksand, sans-serif`,
     paddingLeft: '5%',
     paddingRight: '5%',
     top: '120%',

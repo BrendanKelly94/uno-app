@@ -4,26 +4,35 @@ import {TimelineLite} from 'gsap';
 const Button = React.forwardRef(({children, color, onClick, style, variant}, ref) => {
 
   const outlinedStyle = {
-    height: '2em',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
     border: `.05em solid ${color}`,
     borderRadius: '4px',
     color: `${color}`,
     backgroundColor: 'transparent',
     transition: 'all .5s ease',
     fontSize: '1em',
-    zIndex: 1,
+    zIndex: 11,
+    padding: '.5em 1em .5em 1em',
+    fontFamily: 'Lato, sans-serif'
   }
 
-  const defaulStyle = {
-    height: '2em',
-    color: `${color}`,
-    border: '.05em solid transparent',
-    backgroundColor: 'transparent',
+  const defaultStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: `#191d1b`,
+    fontSize: 'bold',
+    border: 'none',
+    backgroundColor: color,
     transition: 'all .5s ease',
     fontSize: '1em',
-    zIndex: 1,
+    zIndex: 11,
+    padding: '.5em 1em .5em 1em',
+    fontFamily: 'Lato, sans-serif'
   }
-  
+
   const [ buttonStyle, setButtonStyle ] = useState(variant === 'outlined'? outlinedStyle:defaultStyle);
   const [ tl, setTl ] = useState(new TimelineLite);
   const circleRef = useRef(null);
@@ -50,40 +59,38 @@ const Button = React.forwardRef(({children, color, onClick, style, variant}, ref
   }
 
   function mouseLeave(){
-    setButtonStyle((prevState) => {
-      return{
-        ...prevState,
-        backgroundColor: 'transparent',
-      }
-    })
+    setButtonStyle((variant === 'outlined')? outlinedStyle: defaultStyle)
   }
 
   function handleClick(e){
-    const rect = circleRef.current.getBoundingClientRect();
-    const circleX = rect.x + rect.width/2;
-    const circleY = rect.y + rect.height/2;
+    // const rect = circleRef.current.getBoundingClientRect();
+    // const circleX = (rect.x + rect.width/2);
+    // const circleY = (rect.y + rect.height/2);
 
-    console.log(rect)
 
-    tl
-    .set(circleRef.current, { x:e.clientX - circleX, y: e.clientY - circleY, opacity: 1, scale: 0 })
-    .to(circleRef.current, .75, {scale: 1, opacity: 0})
-    .set(circleRef.current, {x:0, y:0, scale:1})
+    // tl
+    // .set(circleRef.current, { x:e.clientX - circleX, y: e.clientY - circleY, opacity: 1})
+    // .to(circleRef.current, 1, {scale: 40, opacity: 0})
+    // .set(circleRef.current, {x:0, y:0, scale:1})
+    // circleRef.current.style.transform = `translate(${e.clientX - circleX}px, ${e.clientY - circleY}px) scale(40) `
+    // setTimeout(() => {
+    //
+    // },500);
+
 
     onClick();
   }
 
+  // <svg
+  //   style = {svgStyle}
+  //   ref = {svgRef}
+  // >
+  //   <circle ref = {circleRef} cx="50%"  cy= "50%" r="1" fill={`${color}`} style = {{opacity: 0, transformOrigin: 'center', transition: 'all .5s ease'}}/>
+  // </svg>
+
 
   useEffect(() => {
-    setButtonStyle({
-      height: '2em',
-      border: `.05em solid ${color}`,
-      borderRadius: '4px',
-      color: `${color}`,
-      backgroundColor: 'transparent',
-      transition: 'all .5s ease',
-      fontSize: '1em'
-    })
+    setButtonStyle(buttonStyle)
   }, [color])
 
   return(
@@ -95,13 +102,8 @@ const Button = React.forwardRef(({children, color, onClick, style, variant}, ref
       ref = {ref}
     >
       <React.Fragment>
-        {children}
-        <svg
-          style = {svgStyle}
-          ref = {svgRef}
-        >
-          <circle ref = {circleRef} cx="50%"  cy= "50%" r="40" fill={`${color}`} transform = "scale(0)" style = {{transformOrigin: 'center'}}/>
-        </svg>
+        <p style ={{margin:0}} >{children}</p>
+
       </React.Fragment>
     </button>
   );

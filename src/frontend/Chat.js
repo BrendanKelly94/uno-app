@@ -1,5 +1,5 @@
 import React, {useState, useRef, useEffect} from 'react';
-import Button from '@material-ui/core/Button';
+import Button from './Button';
 import TextField from '@material-ui/core/TextField';
 
 function Chat({chatToggle, socket, gameId, userName, setCurrentMessage, scale}){
@@ -8,9 +8,10 @@ function Chat({chatToggle, socket, gameId, userName, setCurrentMessage, scale}){
   const first = null;
 
   const messageContainer = {
+    marginTop: '2em',
     width: '80%',
-    height: '80%',
-    fontFamily: 'Heebo sans-serif',
+    height: '70%',
+    fontFamily: 'Lato, sans-serif',
     overflowY: 'scroll'
   }
 
@@ -67,7 +68,7 @@ function Chat({chatToggle, socket, gameId, userName, setCurrentMessage, scale}){
           onChange = {(e) => setMessage(e.target.value)}
           style = {{margin: '1em .5em 1em .5em', width: `${100 * (2-scale)}%`, backgroundColor: '#fff', borderRadius: '4px'}}
         />
-        <Button onClick = {sendMessage} color = 'primary'> Send </Button>
+        <Button style = {{margin: '1em .5em 1em 0'}} onClick = {sendMessage} variant = 'default' color = '#ffffff'> Send </Button>
       </div>
 
 

@@ -35,10 +35,30 @@ const HandCard = React.forwardRef(({ value, color , style, cId, cClass, submitCa
   return(
     <svg ref = {ref} id = {cId? cId: ''} className = {cClass? cClass: ''} onClick = {submitCard?submitCard: () => true} viewBox="0 0 50 70" width = "50" height = "70" style = {style? style: {}} xmlns="http://www.w3.org/2000/svg" >
       <defs>
-        <linearGradient id={`${color}-grad`} x1="0%" y1="20%" x2="100%" y2="80%" >
+        <linearGradient id={`red-grad`} x1="0%" y1="20%" x2="100%" y2="80%" >
           <stop offset="0%" stopColor = {'#ffffff'} stopOpacity = {1}/>
           <stop offset="10%" stopColor = {'#ffffff'} stopOpacity = {1}/>
-          <stop offset="100%" stopColor = {colorEnum[color]} stopOpacity = {1} />
+          <stop offset="100%" stopColor = {colorEnum['red']} stopOpacity = {1} />
+        </linearGradient>
+        <linearGradient id={`yellow-grad`} x1="0%" y1="20%" x2="100%" y2="80%" >
+          <stop offset="0%" stopColor = {'#ffffff'} stopOpacity = {1}/>
+          <stop offset="10%" stopColor = {'#ffffff'} stopOpacity = {1}/>
+          <stop offset="100%" stopColor = {colorEnum['yellow']} stopOpacity = {1} />
+        </linearGradient>
+        <linearGradient id={`green-grad`} x1="0%" y1="20%" x2="100%" y2="80%" >
+          <stop offset="0%" stopColor = {'#ffffff'} stopOpacity = {1}/>
+          <stop offset="10%" stopColor = {'#ffffff'} stopOpacity = {1}/>
+          <stop offset="100%" stopColor = {colorEnum['green']} stopOpacity = {1} />
+        </linearGradient>
+        <linearGradient id={`blue-grad`} x1="0%" y1="20%" x2="100%" y2="80%" >
+          <stop offset="0%" stopColor = {'#ffffff'} stopOpacity = {1}/>
+          <stop offset="10%" stopColor = {'#ffffff'} stopOpacity = {1}/>
+          <stop offset="100%" stopColor = {colorEnum['blue']} stopOpacity = {1} />
+        </linearGradient>
+        <linearGradient id={`black-grad`} x1="0%" y1="20%" x2="100%" y2="80%" >
+          <stop offset="0%" stopColor = {'#ffffff'} stopOpacity = {1}/>
+          <stop offset="10%" stopColor = {'#ffffff'} stopOpacity = {1}/>
+          <stop offset="100%" stopColor = {'#000000'} stopOpacity = {1} />
         </linearGradient>
       </defs>
       <rect x="1" y="1" width="48" height="68" rx="5" ry="5" style = {{fill:`url(#${color}-grad)`,strokeWidth:'1', stroke:'#000'}}/>

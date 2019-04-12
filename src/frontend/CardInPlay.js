@@ -43,7 +43,7 @@ function CardInPlay({ card }){
               <HandCard
                 id = ''
                 value = {null}
-                color = ''
+                color = '#ffffff'
                 style ={{
                   position: 'absolute',
                   transform:  `rotate(${v}deg)`

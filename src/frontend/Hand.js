@@ -28,8 +28,6 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
     display: 'flex',
     justifyContent: 'center',
     transition: 'all .5s ease',
-    // backgroundColor: (isMyTurn)? '#00ffed':'#fff',
-    // boxShadow: (isMyTurn)? '0px 0px 40px 20px #00ffed': '',
     transition: 'filter .5 ease'
   };
 
@@ -200,7 +198,11 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
     </React.Fragment>
   );
 }, (oldP, newP) => {
-
+  // if(oldP.hand.length === newP.hand.length && newP.isMyTurn !== true){
+  //   return true;
+  // }else{
+  //   return false;
+  // }
 })
 
 export default Hand;

@@ -198,11 +198,12 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
     </React.Fragment>
   );
 }, (oldP, newP) => {
-  // if(oldP.hand.length === newP.hand.length && newP.isMyTurn !== true){
-  //   return true;
-  // }else{
-  //   return false;
-  // }
+  if((oldP.hand.length === newP.hand.length) && oldP.isMyTurn === newP.isMyTurn){
+    return true;
+  }else{
+    console.log(oldP, newP)
+    return false;
+  }
 })
 
 export default Hand;

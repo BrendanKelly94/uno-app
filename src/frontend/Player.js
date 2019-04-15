@@ -112,11 +112,11 @@ const Player = React.memo(({ tl, pId, uName, playerStatus, translate, rotate, sc
     </React.Fragment>
   );
 }, (oldP, newP) => {
-  // if(oldP.transorm !== newP.transform || newP.turnId === newP.pId || newP.playerStatus.id === newP.pId){
-  //     return false
-  // }else{
-  //   return true;
-  // }
+  if(oldP.scale !== newP.scale || oldP.turnId === newP.pId || newP.turnId === newP.pId|| newP.playerStatus.id === newP.pId){
+      return false
+  }else{
+    return true;
+  }
 })
 
 export default Player;

@@ -82,6 +82,7 @@ const Player = React.memo(({ tl, pId, uName, playerStatus, translate, rotate, sc
   }, [turnId])
 
   useEffect(() => {
+    console.log(currentMessage.userName)
     if(currentMessage.userName === uName ){
       bubble.current.style.opacity = "1"
       setTimeout(() => {
@@ -112,7 +113,7 @@ const Player = React.memo(({ tl, pId, uName, playerStatus, translate, rotate, sc
     </React.Fragment>
   );
 }, (oldP, newP) => {
-  if(oldP.scale !== newP.scale || oldP.turnId === newP.pId || newP.turnId === newP.pId|| newP.playerStatus.id === newP.pId){
+  if(oldP.scale !== newP.scale || oldP.turnId === newP.pId || newP.turnId === newP.pId|| newP.playerStatus.id === newP.pId || oldP.currentMessage !== newP.currentMessage){
       return false
   }else{
     return true;

@@ -74,7 +74,7 @@ function Lobby(){
     width: '50%',
     height: '50%',
     backgroundColor: 'transparent',
-    color: '#000',
+    color: '#fff',
     fontSize: '2em'
   }
 

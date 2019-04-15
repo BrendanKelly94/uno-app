@@ -7,6 +7,17 @@ function Chat({chatToggle, socket, gameId, userName, setCurrentMessage, scale}){
   const messages = useRef(null);
   const first = null;
 
+  const inputStyle = {
+    margin: '0 .5em 0 .5em',
+    width: `${100 * (2-scale)}%`,
+    backgroundColor: '#fff',
+    border: 'none',
+    height: '2em',
+    paddingLeft: '.5em',
+    fontFamily: 'Lato, sans-serif',
+
+  }
+
   const messageContainer = {
     marginTop: '2em',
     width: '80%',
@@ -19,7 +30,9 @@ function Chat({chatToggle, socket, gameId, userName, setCurrentMessage, scale}){
     width: '100%',
     display: 'flex',
     justifyContent: 'center',
-    alignSelf: 'flex-end'
+    alignSelf: 'flex-end',
+    alignItems: 'center',
+    fontFamily: 'Lato, sans-serif',
 
   }
 
@@ -60,14 +73,7 @@ function Chat({chatToggle, socket, gameId, userName, setCurrentMessage, scale}){
       <div style = {messageContainer} ref = {messages}>
       </div>
       <div style = {sendContainerStyle}>
-        <TextField
-          label="Message"
-          variant = "outlined"
-          multiline
-          value={message}
-          onChange = {(e) => setMessage(e.target.value)}
-          style = {{margin: '1em .5em 1em .5em', width: `${100 * (2-scale)}%`, backgroundColor: '#fff', borderRadius: '4px'}}
-        />
+        <input type = 'text' value = {message} onChange = {(e) => setMessage(e.target.value)} style = {inputStyle} />
         <Button style = {{margin: '1em .5em 1em 0'}} onClick = {sendMessage} variant = 'default' color = '#ffffff'> Send </Button>
       </div>
 

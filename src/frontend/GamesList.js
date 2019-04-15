@@ -61,8 +61,8 @@ function GamesList(){
     history.push('/')
   }
 
-  function handleJoin(e){
-    history.push(`lobby/${e.currentTarget.id}`);
+  function handleJoin(id){
+    history.push(`lobby/${id}`);
   }
 
   async function initializeList(){
@@ -100,7 +100,7 @@ function GamesList(){
               <div>{game.id}</div>
               <div>{game.bot_fill?'Yes':'No'}</div>
               <div>{game.player_count}/6</div>
-              <Button id = {game.id} onClick = {handleJoin} variant = "default" color = "#C9DBBA">Join</Button>
+              <Button onClick = {() => handleJoin(game.id)} variant = "default" color = "#C9DBBA">Join</Button>
             </div>
           )
           }

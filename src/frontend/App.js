@@ -41,13 +41,6 @@ function App() {
 
   const tl = new TimelineMax;
 
-  const colorEnum = {
-    "red": "#FF4747",
-    "yellow": '#FFFF87',
-    "green": '#ACDB85',
-    "blue": '#84BAB7'
-  }
-
   const baseContainerStyle = {
     position: 'absolute',
     height: '100%',

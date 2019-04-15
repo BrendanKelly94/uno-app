@@ -4,11 +4,21 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import Button from '@material-ui/core/Button';
 import history from '../utils/history.js';
-import ApiEndpoint from '../modals/CreateModal.js';
+import ApiEndpoint from '../utils/ApiEndpoint.js';
 
-function CreateModal({ open, setOpen }){
+function CreateModal({ open, setOpen, userName }){
   const [ fillBots, setFillBots ] = useState(false);
   const [ err, setErr ] = useState(null);
+
+  const createGame = async () => {
+    const newGameData = await new ApiEndpoint('/api/newGame').postReq({botFill: fillBots, userName: userName})
+    if(newGameData.hasOwnProperty('err')){
+      setError(newGameData.err)
+      console.log('err')
+    }else{
+       history.push(`lobby/${newGameData.id}`);
+    }
+  }
 
   const containerStyle = {
     position: 'absolute',
@@ -27,25 +37,15 @@ function CreateModal({ open, setOpen }){
   }
 
 
-  const handleCreate = async () => {
-    const newGameData = await new ApiEndpoint('/api/newGame').postReq({botFill: fillBots})
-    if(newGameData.hasOwnProperty(err)){
-      setError(newGameData.err)
-    }else{
-      history.push(`lobby/${newGameData.id}`);
-    }
-  }
-
   return(
     <Modal
-          aria-labelledby="log into account"
-          aria-describedby="log in or register popup"
+          aria-labelledby="create game"
+          aria-describedby="create game popup"
           open={open}
           onClose={setOpen}
         >
         <div style={containerStyle}>
           <div style={modalStyle} >
-            <button onClick = {() => setOpen()}> x </button>
             <FormControlLabel
               control={
                 <Checkbox
@@ -53,11 +53,12 @@ function CreateModal({ open, setOpen }){
                   onChange={() => setFillBots(!fillBots)}
                   value="checkedB"
                   color="primary"
+                  style = {{marginLeft: '1em'}}
                 />
                 }
                 label="fill with bots"
             />
-            <Button onClick = {handleCreate}>Create Game</Button>
+            <Button onClick = {createGame}>Create Game</Button>
           </div>
         </div>
     </Modal>

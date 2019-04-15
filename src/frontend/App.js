@@ -22,7 +22,7 @@ function App() {
   const [ login, setLogin ] = useContext(authStoreContext);
   const [ myId, setMyId ] = useState(null);
   const [ isHost, setIsHost ] = useState(false);
-  const [ turnStatus, setTurnStatus ] = useState({turnId: null, lastTurnId: null , newCard: {value: null, color: ''}})
+  const [ turnStatus, setTurnStatus ] = useState({turnId: null, lastTurnId: null , newCard: {id: null, value: null, color: ''}})
   const [ middleCard, setMiddleCard ] = useState({});
   const [ players, setPlayers ] = useState([]);
   const [ shiftedPlayers, setShiftedPlayers ] = useState([]);
@@ -188,8 +188,8 @@ function App() {
         setMyId(mId);
         setTurnStatus({
           turnId: gameData.game.turn_id,
-          lastTurnId: (myI -1 < 0)?playersData.players[playersData.players.length -1].id:mId,
-          newCard: {value: null, color: ''}
+          lastTurnId: gameData.game.turn_id,
+          newCard: {id: null,value: null, color: ''}
         })
         setHand(handData.hand);
         setMiddleCard(cIPData.card)
@@ -264,7 +264,7 @@ function App() {
 
   //animate player's new card to middle
   useEffect(() => {
-    if(turnStatus.newCard.id !== -1 && turnStatus.lastTurnId !== myId){
+    if(turnStatus.newCard.id !== -1 && turnStatus.newCard.id !== null && turnStatus.lastTurnId !== myId){
       let target = document.getElementById(`player-${turnStatus.lastTurnId}-card-0`);
       const lastI = players.findIndex(player => player.id === turnStatus.lastTurnId);
       const initTransform = FindInitTransform(target, players[lastI].rotate, scaleFactor.size);

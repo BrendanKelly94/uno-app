@@ -12,7 +12,7 @@ function Lobby(){
   const [ login, setLogin ] = useContext(authStoreContext);
   const [ players, setPlayers ] = useState([]);
   const [ isFirst, setIsFirst ] = useState(true);
-  const [ error, setError ] = useState(null);
+  const [ err, setErr ] = useState(null);
   const [ hasEnded, setHasEnded ] = useState(false);
   const [ isHost, setIsHost ] = useState(false);
   const [ myId, setMyId ] = useState(null);
@@ -198,12 +198,12 @@ function Lobby(){
   }, [hasEnded])
 
   useEffect(() => {
-    if(error !== null){
+    if(err !== null){
       setTimeout(() => {
         history.push('/gamesList')
       }, 2000)
     }
-  }, [error])
+  }, [err])
 
   useEffect(() => {
     if(chatToggle){
@@ -251,9 +251,9 @@ function Lobby(){
       }
 
       {
-        error &&
+        err &&
           <div style = {endedStyle}>
-            {error}
+            {err}
           </div>
       }
     </React.Fragment>

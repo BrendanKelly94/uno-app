@@ -67,13 +67,7 @@ function Home(){
     if(!context.user_name){
       setAuth(!auth);
     }else{
-      const newGameData = await new ApiEndpoint('/api/newGame').postReq({botFill: true, userName: context.user_name})
-      if(newGameData.hasOwnProperty('err')){
-        // setError(newGameData.err)
-        console.log('err')
-      }else{
-        history.push(`lobby/${newGameData.id}`);
-      }
+      setCreate(!create);
     }
   }
 
@@ -97,6 +91,7 @@ function Home(){
             <Button id = 'join-button' variant = "default" color = "#C9DBBA" onClick = {handleJoin}>JOIN GAME</Button>
             <Button id = 'create-button' variant = "default" color = "#C9DBBA" onClick = {handleCreate}>CREATE GAME</Button>
             <AuthModal open = {auth} setOpen = {() => setAuth(!auth)} login = {login}/>
+            <CreateModal open = {create} setOpen = {() => {setCreate(!create)}} userName = {context.user_name}/>
           </div>
         </div>
       </div>

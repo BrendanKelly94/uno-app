@@ -7,12 +7,19 @@ function BuildPlayers({ players, username, scaleFactor}){
     temp.push(s);
   }
   temp.shift();
-  //set translate, rotate, and scale
-  for(let i = 0; i < temp.length; i++){
-    temp[i].translate = {x: (window.innerWidth * scaleFactor.x) * Math.cos(-Math.PI/(temp.length - 1) * i) + (50 * scaleFactor.x), y: (window.innerHeight * scaleFactor.y) * Math.sin(-Math.PI/(temp.length - 1) * i) }
-    temp[i].rotate = 90 - 180/(temp.length - 1) * i;
-    temp[i].scale = scaleFactor.size;
+
+  if(temp.length === 1){
+    temp[0].translate = {x: (50 * scaleFactor.x), y: (-window.innerHeight * scaleFactor.y)}
+    temp[0].rotate = 0;
+    temp[0].scale = scaleFactor.size;
+  }else{
+    for(let i = 0; i < temp.length; i++){
+      temp[i].translate = {x: (window.innerWidth * scaleFactor.x) * Math.cos(-Math.PI/(temp.length - 1) * i) + (50 * scaleFactor.x), y: (window.innerHeight * scaleFactor.y) * Math.sin(-Math.PI/(temp.length - 1) * i) }
+      temp[i].rotate = 90 - 180/(temp.length - 1) * i;
+      temp[i].scale = scaleFactor.size;
+    }
   }
+
   return temp;
 }
 

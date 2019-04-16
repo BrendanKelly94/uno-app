@@ -6,7 +6,8 @@ const HandCard = React.forwardRef(({ value, color , style, cId, cClass, submitCa
     "red": "#FF4747",
     "yellow": '#FFFF87',
     "green": '#ACDB85',
-    "blue": '#84BAB7'
+    "blue": '#84BAB7',
+    "black": '#AAAAAA'
   }
 
   let item = value;
@@ -61,7 +62,7 @@ const HandCard = React.forwardRef(({ value, color , style, cId, cClass, submitCa
           <stop offset="100%" stopColor = {'#000000'} stopOpacity = {1} />
         </linearGradient>
       </defs>
-      <rect x="1" y="1" width="48" height="68" rx="5" ry="5" fill = {`url(#${color}-grad)`} style = {{strokeWidth:'1', stroke:'#000'}}/>
+      <rect x="1" y="1" width="48" height="68" rx="5" ry="5" fill = {`${colorEnum[color]}`} style = {{strokeWidth:'1', stroke:'#000'}}/>
       <text x = "5%" y= "5%" dominantBaseline = "hanging" style = {{fontFamily: `Quicksand, sans-serif`}}> {item} </text>
 
     </svg>

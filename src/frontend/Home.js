@@ -21,8 +21,6 @@ function Home(){
 
   const headingStyle = {
     textAlign: 'center',
-    marginBottom: '1em',
-    marginTop: '2em',
     fontSize: '4em',
     fontFamily: `Quicksand, sans-serif`,
     color: '#fff'
@@ -38,13 +36,14 @@ function Home(){
 
   const homeContainerStyle = {
     position: 'absolute',
-    height: '80%',
+    height: '100%',
     left: '50%',
     transform: 'translate(-50%,0)',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    backgroundColor: 'transparent'
+    justifyContent: 'flex-end',
+    backgroundColor: 'transparent',
   }
 
   const baseContainerStyle = {

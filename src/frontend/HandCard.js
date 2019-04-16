@@ -61,7 +61,7 @@ const HandCard = React.forwardRef(({ value, color , style, cId, cClass, submitCa
           <stop offset="100%" stopColor = {'#000000'} stopOpacity = {1} />
         </linearGradient>
       </defs>
-      <rect x="1" y="1" width="48" height="68" rx="5" ry="5" style = {{fill:`url(#${color}-grad)`,strokeWidth:'1', stroke:'#000'}}/>
+      <rect x="1" y="1" width="48" height="68" rx="5" ry="5" fill = {`url(#${color}-grad)`} style = {{strokeWidth:'1', stroke:'#000'}}/>
       <text x = "5%" y= "5%" dominantBaseline = "hanging" style = {{fontFamily: `Quicksand, sans-serif`}}> {item} </text>
 
     </svg>

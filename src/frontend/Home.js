@@ -37,6 +37,7 @@ function Home(){
   const homeContainerStyle = {
     position: 'absolute',
     height: '100%',
+    top: 0,
     left: '50%',
     transform: 'translate(-50%,0)',
     display: 'flex',

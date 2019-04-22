@@ -5,6 +5,7 @@ const Button = React.forwardRef(({children, color, onClick, style, variant}, ref
 
   const outlinedStyle = {
     display: 'flex',
+    position: 'relative',
     alignItems: 'center',
     justifyContent: 'center',
     border: `.05em solid ${color}`,
@@ -15,11 +16,12 @@ const Button = React.forwardRef(({children, color, onClick, style, variant}, ref
     fontSize: '1em',
     zIndex: 11,
     padding: '.5em 1em .5em 1em',
-    fontFamily: 'Lato, sans-serif'
+    fontFamily: 'Lato, sans-serif',
   }
 
   const defaultStyle = {
     display: 'flex',
+    position: 'relative',
     alignItems: 'center',
     justifyContent: 'center',
     color: `#191d1b`,
@@ -30,12 +32,14 @@ const Button = React.forwardRef(({children, color, onClick, style, variant}, ref
     fontSize: '1em',
     zIndex: 11,
     padding: '.5em 1em .5em 1em',
-    fontFamily: 'Lato, sans-serif'
+    fontFamily: 'Lato, sans-serif',
+
   }
 
   const [ buttonStyle, setButtonStyle ] = useState(variant === 'outlined'? outlinedStyle:defaultStyle);
-  const [ tl, setTl ] = useState(new TimelineLite);
+  const [ animate, setAnimate ] = useState(false);
   const circleRef = useRef(null);
+  const animateRef = useRef(null);
   const svgRef = useRef(null);
 
   const first = null;
@@ -63,49 +67,41 @@ const Button = React.forwardRef(({children, color, onClick, style, variant}, ref
   }
 
   function handleClick(e){
-    // const rect = circleRef.current.getBoundingClientRect();
-    // const circleX = (rect.x + rect.width/2);
-    // const circleY = (rect.y + rect.height/2);
-
-
-    // tl
-    // .set(circleRef.current, { x:e.clientX - circleX, y: e.clientY - circleY, opacity: 1})
-    // .to(circleRef.current, 1, {scale: 40, opacity: 0})
-    // .set(circleRef.current, {x:0, y:0, scale:1})
-    // circleRef.current.style.transform = `translate(${e.clientX - circleX}px, ${e.clientY - circleY}px) scale(40) `
-    // setTimeout(() => {
-    //
-    // },500);
-
-
+    const rect = circleRef.current.getBoundingClientRect();
+    const circleX = (rect.x + rect.width/2);
+    const circleY = (rect.y + rect.height/2);
+    circleRef.current.style.transform = `translate(${e.clientX-circleX}px, ${e.clientY-circleY}px)`
+    animateRef.current.beginElement();
     onClick();
   }
-
-  // <svg
-  //   style = {svgStyle}
-  //   ref = {svgRef}
-  // >
-  //   <circle ref = {circleRef} cx="50%"  cy= "50%" r="1" fill={`${color}`} style = {{opacity: 0, transformOrigin: 'center', transition: 'all .5s ease'}}/>
-  // </svg>
-
 
   useEffect(() => {
     setButtonStyle(buttonStyle)
   }, [color])
 
   return(
+    <div style = {{...style, display: 'flex', justifyContent: 'center'}}>
     <button
       onMouseEnter = {mouseEnter}
       onMouseLeave = {mouseLeave}
       onClick = {handleClick}
-      style = {{...style, ...buttonStyle}}
+      style = {buttonStyle}
       ref = {ref}
     >
-      <React.Fragment>
+        <svg
+          style = {svgStyle}
+          ref = {svgRef}
+        >
+          <circle ref = {circleRef} cx="50%"  cy= "50%" r="0" fill={`${color}`} style = {{opacity: 1, transformOrigin: 'center'}}>
+              <animate ref = {animateRef} attributeName="r" from="0" to="200"
+            dur=".5s" repeatCount="0" begin = 'indefinite' fill = "remove"/>
+          </circle>
+
+        </svg>
         <p style ={{margin:0}} >{children}</p>
 
-      </React.Fragment>
     </button>
+    </div>
   );
 });
 

@@ -1,4 +1,5 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
+import { Scrollbars } from 'react-custom-scrollbars';
 import gameStoreContext from './context/gameStoreContext';
 import ApiEndpoint from './utils/ApiEndpoint';
 import HandCard from './HandCard';
@@ -175,24 +176,25 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
 
   return(
     <React.Fragment>
-      <div id = {`player-${myId}-card-0`} style = {containerStyle} ref = {handRef}>
-        {
-          hand.map((item, i) =>
-            <HandCard
-              key = {'hand-'+item.id}
-              color = {item.color}
-              value = {item.value}
-              cId = {`hand-${item.id}`}
-              cClass = {'hand-card'}
-              style = {{
-                transformOrigin: 'top left',
-              }}
-              submitCard = {handleOptionClick}
-            />
-          )
-      }
-      </div>
-
+    <Scrollbars>
+        <div id = {`player-${myId}-card-0`} style = {containerStyle} ref = {handRef}>
+          {
+            hand.map((item, i) =>
+              <HandCard
+                key = {'hand-'+item.id}
+                color = {item.color}
+                value = {item.value}
+                cId = {`hand-${item.id}`}
+                cClass = {'hand-card'}
+                style = {{
+                  transformOrigin: 'top left',
+                }}
+                submitCard = {handleOptionClick}
+              />
+            )
+        }
+        </div>
+      </Scrollbars>
       <div style = {drawBoxStyle} onClick = {handleDrawClick}></div>
       <ColorChanger changeColor = {handleColorChange} toggle = {colorChange.status} handRef = {handRef}/>
     </React.Fragment>
@@ -201,7 +203,6 @@ const Hand = React.memo(({ tl, myId, hand, isMyTurn, lastTurnId, scaleFactor, dr
   if((oldP.hand.length === newP.hand.length) && oldP.isMyTurn === newP.isMyTurn){
     return true;
   }else{
-    console.log(oldP, newP)
     return false;
   }
 })

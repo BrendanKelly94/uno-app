@@ -16,6 +16,8 @@ module.exports = {
   development: {
     client: 'postgresql',
     connection: {
+        host : '127.0.0.1',
+        port: 5433,
         database: 'uno_test',
         user:     'brendan',
         password: 'Brendan1'

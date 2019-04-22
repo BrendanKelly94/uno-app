@@ -71,7 +71,7 @@ function AuthModal({ open , setOpen, login }){
 
   const handleRegister = async () => {
     if(auth.pwd !== auth.rePwd){
-      setErr('passwords do not match')
+      setStatus({err:'passwords do not match'})
     }
     try{
 

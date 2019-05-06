@@ -1,30 +1,30 @@
-function ApiEndpoint(uri){
+function ApiEndpoint(uri) {
   this.uri = uri;
   this.getReq = async () => {
-    try{
+    try {
       const res = await fetch(this.uri);
       const json = await res.json();
       return json;
-    }catch(e){
+    } catch (e) {
       throw new Error(e);
     }
-  }
-  this.postReq = async (json) => {
-    try{
+  };
+  this.postReq = async json => {
+    try {
       const res = await fetch(this.uri, {
-          method: "POST",
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(json)
-      })
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(json)
+      });
       const rJson = await res.json();
       return rJson;
-    }catch(e){
+    } catch (e) {
       throw new Error(e);
     }
-  }
+  };
 }
 
 export default ApiEndpoint;

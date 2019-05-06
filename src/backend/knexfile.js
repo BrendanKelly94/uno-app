@@ -1,29 +1,29 @@
 // Update with your config settings.
 
 module.exports = {
-  test:{
-      client: 'postgresql',
-      connection: {
-          database: 'uno_test',
-          user:     'brendan',
-          password: 'Brenan1'
-      },
-      migrations: {
-        directory: __dirname + '/db/migrations'
-      }
+  test: {
+    client: "postgresql",
+    connection: {
+      database: "uno_test",
+      user: "brendan",
+      password: "Brenan1"
+    },
+    migrations: {
+      directory: __dirname + "/db/migrations"
+    }
   },
 
   development: {
-    client: 'postgresql',
+    client: "postgresql",
     connection: {
-        host : '127.0.0.1',
-        port: 5433,
-        database: 'uno_test',
-        user:     'brendan',
-        password: 'Brendan1'
+      host: "127.0.0.1",
+      port: 5433,
+      database: "uno_test",
+      user: "brendan",
+      password: "Brendan1"
     },
     migrations: {
-      directory: __dirname + '/db/migrations'
+      directory: __dirname + "/db/migrations"
     }
   },
 
@@ -44,11 +44,10 @@ module.exports = {
   // },
 
   production: {
-    client: 'postgresql',
+    client: "postgresql",
     connection: process.env.DATABASE_URL,
     migrations: {
-      directory: __dirname + '/db/migrations'
+      directory: __dirname + "/db/migrations"
     }
   }
-
 };

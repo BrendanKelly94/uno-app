@@ -47,7 +47,7 @@ function App() {
   const [hasEnded, setHasEnded] = useState(false);
   const [wonName, setWonName] = useState(null);
   const scaleFactor = useScale();
-  const source = useRef(null);
+  const newCardRef = useRef(null);
   const first = null;
   const location = history.location.pathname.split("/");
   const gameId = location[location.length - 1];
@@ -327,7 +327,7 @@ function App() {
         const bBox = target.getBoundingClientRect();
         const variance = Math.random() * (5 - -5) + -5;
 
-        tl.set(source.current, {
+        tl.set(newCardRef.current, {
           x: initTransform.x,
           y: initTransform.y,
           rotation: initTransform.rotate,
@@ -340,8 +340,8 @@ function App() {
             });
           }
         })
-          .to(source.current, 0.25, { opacity: 1 }, "+=.25")
-          .to(source.current, 0.5, {
+          .to(newCardRef.current, 0.25, { opacity: 1 }, "+=.25")
+          .to(newCardRef.current, 0.5, {
             x: bBox.x,
             y: bBox.y,
             rotation: variance,
@@ -355,7 +355,7 @@ function App() {
               });
             }
           })
-          .set(source.current, { opacity: 0 });
+          .set(newCardRef.current, { opacity: 0 });
       } else if (
         turnStatus.newCard.id !== -1 &&
         turnStatus.lastTurnId === myId
@@ -370,7 +370,7 @@ function App() {
           isAnimating: false,
           isDrawing: true
         });
-        tl.to(source.current, 0.5, {
+        tl.to(newCardRef.current, 0.5, {
           onComplete: () =>
             setPlayerStatus({ id: null, isAnimating: false, isDrawing: false })
         });
@@ -472,7 +472,7 @@ function App() {
 
         <HandCard
           cId="new"
-          ref={source}
+          ref={newCardRef}
           value={turnStatus.newCard.value}
           color={turnStatus.newCard.color}
           style={{
@@ -512,11 +512,11 @@ function App() {
         setCurrentMessage={setCurrentMessage}
       />
 
-      {hasEnded ? <div style={endedStyle}>Host has Ended Game</div> : null}
+      {hasEnded && <div style={endedStyle}>Host has Ended Game</div>}
 
-      {wonName ? (
+      {wonName && (
         <div style={endedStyle}>Player {wonName} has won the game!</div>
-      ) : null}
+      )}
     </React.Fragment>
   );
 }

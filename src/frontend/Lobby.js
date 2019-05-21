@@ -8,6 +8,8 @@ import ApiEndpoint from "./utils/ApiEndpoint";
 import useScale from "./utils/useScale.js";
 import io from "socket.io-client";
 
+const socket = io("/game", { transports: ["websocket"], upgrade: false });
+
 function Lobby() {
   const [login, setLogin] = useContext(authStoreContext);
   const [players, setPlayers] = useState([]);
@@ -16,9 +18,6 @@ function Lobby() {
   const [hasEnded, setHasEnded] = useState(false);
   const [isHost, setIsHost] = useState(false);
   const [myId, setMyId] = useState(null);
-  const [socket, setSocket] = useState(
-    io("/game", { transports: ["websocket"], upgrade: false })
-  );
   const [chatToggle, setChatToggle] = useState(false);
   const scaleFactor = useScale();
   const location = history.location.pathname.split("/");
@@ -104,6 +103,7 @@ function Lobby() {
         console.log(e);
       }
     }
+    socket.close();
   };
 
   async function initializeLobby() {

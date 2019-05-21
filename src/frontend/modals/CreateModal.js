@@ -16,8 +16,7 @@ function CreateModal({ open, setOpen, userName }) {
       userName: userName
     });
     if (newGameData.hasOwnProperty("err")) {
-      setError(newGameData.err);
-      console.log("err");
+      setErr(newGameData.err);
     } else {
       history.push(`lobby/${newGameData.id}`);
     }

@@ -65,11 +65,11 @@ function GamesList() {
 
   async function initializeList() {
     if (state.isFirst) {
-      try {
-        const gamesData = await new ApiEndpoint("/api/games").getReq();
+      const gamesData = await new ApiEndpoint("/api/games").getReq();
+      if(!gamesData.err) {
         setState({ ...state, games: gamesData.games, isFirst: false });
-      } catch (e) {
-        setState({ ...state, error: e, isFirst: false });
+      }else{
+        setState({ ...state, error: gamesData.err, isFirst: false });
       }
     }
   }
@@ -116,7 +116,7 @@ function GamesList() {
           ))}
         </div>
       </div>
-      {error && <div> {error} </div>}
+
     </React.Fragment>
   );
 }

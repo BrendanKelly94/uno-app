@@ -18,6 +18,8 @@ import DrawCard from "./DrawCard";
 import io from "socket.io-client";
 import history from "./utils/history";
 
+const socket = io("/game", { transports: ["websocket"], upgrade: false });
+
 function App() {
   const [login, setLogin] = useContext(authStoreContext);
   const [myId, setMyId] = useState(null);
@@ -27,27 +29,26 @@ function App() {
     lastTurnId: null,
     newCard: { id: null, value: null, color: "" }
   });
-  const [middleCard, setMiddleCard] = useState({});
-  const [players, setPlayers] = useState([]);
-  const [shiftedPlayers, setShiftedPlayers] = useState([]);
-  const [hand, setHand] = useState([]);
   const [playerStatus, setPlayerStatus] = useState({
     isAnimating: false,
     isDrawing: false,
     id: null
   });
-  const [socket, setSocket] = useState(
-    io("/game", { transports: ["websocket"], upgrade: false })
-  );
-  const [chatToggle, setChatToggle] = useState(false);
   const [currentMessage, setCurrentMessage] = useState({
     message: "",
     userName: null
   });
+  const [middleCard, setMiddleCard] = useState({});
+  const [players, setPlayers] = useState([]);
+  const [shiftedPlayers, setShiftedPlayers] = useState([]);
+  const [hand, setHand] = useState([]);
+  const [chatToggle, setChatToggle] = useState(false);
   const [hasEnded, setHasEnded] = useState(false);
   const [wonName, setWonName] = useState(null);
+
   const scaleFactor = useScale();
   const newCardRef = useRef(null);
+  
   const first = null;
   const location = history.location.pathname.split("/");
   const gameId = location[location.length - 1];
@@ -127,6 +128,7 @@ function App() {
         const leaveData = await leaveReq.postReq();
         history.push("/gamesList");
       }
+      socket.close();
     } catch (e) {
       console.log(e);
     }

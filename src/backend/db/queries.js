@@ -13,9 +13,7 @@ const getUsers = () => {
 };
 
 const findUser = ({ name }) => {
-  return knex("Users")
-    .where({ name: name })
-    .select();
+  return knex('Users').where('name', name).first();
 };
 
 //Games
@@ -29,7 +27,7 @@ const getGames = () => {
 const findGame = ({ gameId }) => {
   return knex("Games")
     .where("id", gameId)
-    .select();
+    .first();
 };
 
 const createGame = async ({ botFill }) => {
@@ -63,7 +61,7 @@ const fillBots = async ({ gameId }) => {
   try {
     const x = await updatePlayerCount({ gameId: gameId, num: 6 });
   } catch (e) {
-    console.log(e);
+    throw new Error(e);
   }
   return knex("Players")
     .where("game_id", gameId)
@@ -101,7 +99,7 @@ const addPlayer = async ({ gameId, name }) => {
       game_id: gameId,
       user_name: name,
       is_bot: "false",
-      is_host: game[0].player_count === 0 ? true : false
+      is_host: game.player_count === 0 ? true : false
     })
     .returning("id");
 };
@@ -142,13 +140,13 @@ const getPlayers = ({ gameId }) => {
 const getPlayer = ({ playerId }) => {
   return knex("Players")
     .where("id", playerId)
-    .select();
+    .first();
 };
 
 const findPlayer = ({ name }) => {
   return knex("Players")
     .where({ user_name: name })
-    .select();
+    .first();
 };
 
 const getPlayerHandCount = ({ playerId }) => {
@@ -161,7 +159,7 @@ const getPlayerHandCount = ({ playerId }) => {
 const getCard = ({ cardId }) => {
   return knex("GameCards")
     .where("id", cardId)
-    .select();
+    .first();
 };
 
 const getDeck = ({ gameId }) => {
@@ -199,7 +197,7 @@ const setFirstCardInPlay = async ({ gameId }) => {
       })
       .returning("id");
   } catch (e) {
-    console.log(e);
+    throw new Error(e);
   }
 };
 
@@ -207,7 +205,7 @@ const setCardInPlay = async ({ gameId, playerId, cId }) => {
   const colors = ["red", "blue", "green", "yellow"];
   try {
     const cIP = await getCard({ cardId: cId });
-    if (cIP[0].color === "black") {
+    if (cIP.color === "black") {
       const randomC = colors[Math.floor(Math.random() * colors.length)];
       const changeC = await changeColor({ cId: cId, color: randomC });
     }
@@ -222,7 +220,6 @@ const setCardInPlay = async ({ gameId, playerId, cId }) => {
         is_available: false
       });
   } catch (e) {
-    console.log(e);
     throw new Error(e);
   }
 };
@@ -244,7 +241,6 @@ const removeCardInPlay = async ({ gameId }) => {
       })
       .returning("id");
   } catch (e) {
-    console.log(e);
     throw new Error(e);
   }
 };
@@ -310,7 +306,7 @@ const generateHand = async ({ gameId, playerId }) => {
       })
       .returning("id");
   } catch (e) {
-    console.log(e);
+    throw new Error(e);
   }
 };
 
@@ -324,13 +320,13 @@ const getNextTurn = async ({ gameId, currentTurn, isSkip }) => {
 
     let nextTurn;
     if (isSkip) {
-      if (game[0].direction) {
+      if (game.direction) {
         nextTurn = players[(currIndex + 2) % players.length];
       } else {
         nextTurn = players[(currIndex - 2 + players.length) % players.length];
       }
     } else {
-      if (game[0].direction) {
+      if (game.direction) {
         nextTurn = players[(currIndex + 1) % players.length];
       } else {
         nextTurn = players[(currIndex - 1 + players.length) % players.length];
@@ -347,7 +343,7 @@ const nextTurn = async ({ gameId, isSkip }) => {
     const game = await findGame({ gameId: gameId });
     const nTurn = await getNextTurn({
       gameId: gameId,
-      currentTurn: game[0].turn_id,
+      currentTurn: game.turn_id,
       isSkip: isSkip
     });
     await setTurn({ gameId: gameId, playerId: nTurn.id });
@@ -360,7 +356,7 @@ const nextTurn = async ({ gameId, isSkip }) => {
 const flipDirection = async ({ gameId }) => {
   try {
     const game = await findGame({ gameId: gameId });
-    lastDirection = game[0].direction;
+    lastDirection = game.direction;
 
     return knex("Games")
       .where("id", gameId)
@@ -378,24 +374,9 @@ const giveCards = async ({ gameId, num }) => {
     const deck = await getDeck({ gameId: gameId });
     const game = await findGame({ gameId: gameId });
 
-    //find who the target is
-    // let target = game[0].turn_id
-    // let travel = 0
-    // do{
-    //   const nextTurn = await getNextTurn(gameId, target, false);
-    //   const nextHand = await getHand(nextTurn.id);
-    //   let filterHand = nextHand.filter(item => cardFilter(item));
-    //   if(filterHand.length > 0){
-    //      target = nextTurn.id
-    //      travel++;
-    //   }
-    // }while(filterHand.length > 0);
-    //
-    // const effectiveNum = num + (travel * num)
-
     const nextTurn = await getNextTurn({
       gameId: gameId,
-      currentTurn: game[0].turn_id,
+      currentTurn: game.turn_id,
       isSkip: false
     });
     let random;

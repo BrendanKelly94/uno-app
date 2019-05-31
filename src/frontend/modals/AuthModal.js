@@ -3,13 +3,16 @@ import Modal from "@material-ui/core/Modal";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 import ApiEndpoint from "../utils/ApiEndpoint.js";
+import CustomError from "../utils/CustomError.js";
 import useScale from "../utils/useScale.js";
+import useError from "../utils/useError.js";
 
 function AuthModal({ open, setOpen, login }) {
   const [auth, setAuth] = useState({ name: "", pwd: "", rePwd: "" });
   const [reg, setReg] = useState(false);
-  const [status, setStatus] = useState({ err: false, success: null });
+  const [success, setSuccess] = useState(false);
   const scaleFactor = useScale();
+  const [error, errorHandler] = useError();
   const [width, setWidth] = useState(scaleFactor.size < 1.2 ? "90%" : "50%");
 
   const containerStyle = {
@@ -49,59 +52,44 @@ function AuthModal({ open, setOpen, login }) {
     textAlign: "center"
   };
 
-  const handleLogin = async () => {
-    try {
+  async function handleLogin(){
+    errorHandler(async () => {
       const loginData = await new ApiEndpoint("/login").postReq({
         name: auth.name,
         pwd: auth.pwd
       });
       if (loginData.hasOwnProperty("name")) {
+        setSuccess(true);
+        setTimeout(() => {
+          setOpen(false);
+        }, 500);
+        login(auth.name, auth.pwd);
+      }
+    })();
+  }
+
+  async function handleRegister(){
+    errorHandler(async () => {
+      if(auth.pwd !== auth.rePwd){
+        throw new CustomError({
+          status:200,
+          message: "Passwords do not match"
+        })
+      }
+
+      const regData = await new ApiEndpoint("/register").postReq({
+        name: auth.name,
+        pwd: auth.pwd
+      });
+      if (regData.hasOwnProperty("name")) {
         setStatus({ err: null, success: true });
         setTimeout(() => {
           setOpen(false);
         }, 500);
         login(auth.name, auth.pwd);
-      } else {
-        setStatus({ err: loginData.err });
       }
-    } catch (e) {
-      setStatus({ err: e });
-    }
-  };
-
-  const handleRegister = async () => {
-    if (auth.pwd !== auth.rePwd) {
-      setStatus({ err: "passwords do not match" });
-
-    }else{
-      try {
-        const regData = await new ApiEndpoint("/register").postReq({
-          name: auth.name,
-          pwd: auth.pwd
-        });
-        if (regData.hasOwnProperty("name")) {
-          setStatus({ err: null, success: true });
-          setTimeout(() => {
-            setOpen(false);
-          }, 500);
-          login(auth.name, auth.pwd);
-        } else {
-          setStatus({ ...status, err: regData.err });
-        }
-      } catch (e) {
-        setStatus({ ...status, err: e });
-      }
-    }
-  };
-
-  useEffect(
-    () => {
-      if (!open) {
-        setStatus({ ...status, err: null });
-      }
-    },
-    [open]
-  );
+    })();
+  }
 
   useEffect(
     () => {
@@ -114,7 +102,6 @@ function AuthModal({ open, setOpen, login }) {
     [scaleFactor]
   );
 
-  const { err, success } = status;
   return (
     <Modal
       aria-labelledby="log into account"
@@ -126,16 +113,18 @@ function AuthModal({ open, setOpen, login }) {
         {
           <div
             style={
-              err
+              error.status
                 ? { ...messageStyle, ...errStyle }
                 : success
                 ? { ...messageStyle, ...successStyle }
                 : messageStyle
             }
           >
-            {err ? err : null}
-            {success ? "You have successfully logged in!" : null}
+            {error.status && !success && <div>{error.message}</div>}
+            {success && <div>{"You have successfully logged in!"}</div>}
           </div>
+
+
         }
         <div style={modalStyle}>
           <TextField

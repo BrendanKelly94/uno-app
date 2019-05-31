@@ -4,22 +4,21 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
 import Button from "@material-ui/core/Button";
 import history from "../utils/history.js";
+import useError from "../utils/useError.js";
 import ApiEndpoint from "../utils/ApiEndpoint.js";
 
 function CreateModal({ open, setOpen, userName }) {
   const [fillBots, setFillBots] = useState(false);
-  const [err, setErr] = useState(null);
+  const [error, errorHandler ] = useState(null);
 
   const createGame = async () => {
-    const newGameData = await new ApiEndpoint("/api/newGame").postReq({
-      botFill: fillBots,
-      userName: userName
-    });
-    if (newGameData.hasOwnProperty("err")) {
-      setErr(newGameData.err);
-    } else {
+    errorHandler(async () => {
+      const newGameData = await new ApiEndpoint("/api/newGame").postReq({
+        botFill: fillBots,
+        userName: userName
+      });
       history.push(`lobby/${newGameData.id}`);
-    }
+    })();
   };
 
   const containerStyle = {
@@ -60,6 +59,7 @@ function CreateModal({ open, setOpen, userName }) {
             label="fill with bots"
           />
           <Button onClick={createGame}>Create Game</Button>
+          {err.status && <div style = {{color: 'red'}}>{err.message}</div>}
         </div>
       </div>
     </Modal>

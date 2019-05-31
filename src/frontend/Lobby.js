@@ -6,19 +6,20 @@ import Button from "./Button";
 import TextField from "@material-ui/core/TextField";
 import ApiEndpoint from "./utils/ApiEndpoint";
 import useScale from "./utils/useScale.js";
+import useError from "./utils/useError.js"
 import io from "socket.io-client";
 
 const socket = io("/game", { transports: ["websocket"], upgrade: false });
 
 function Lobby() {
-  const [login, setLogin] = useContext(authStoreContext);
-  const [players, setPlayers] = useState([]);
-  const [isFirst, setIsFirst] = useState(true);
-  const [err, setErr] = useState(null);
-  const [hasEnded, setHasEnded] = useState(false);
-  const [isHost, setIsHost] = useState(false);
-  const [myId, setMyId] = useState(null);
-  const [chatToggle, setChatToggle] = useState(false);
+  const [ login, setLogin ] = useContext(authStoreContext);
+  const [ players, setPlayers ] = useState([]);
+  const [ isFirst, setIsFirst ] = useState(true);
+  const [ hasEnded, setHasEnded ] = useState(false);
+  const [ isHost, setIsHost ] = useState(false);
+  const [ myId, setMyId ] = useState(null);
+  const [ chatToggle, setChatToggle ] = useState(false);
+  const [ error, errorHandler ] = useError();
   const scaleFactor = useScale();
   const location = history.location.pathname.split("/");
   const gId = parseInt(location[location.length - 1], 10);
@@ -87,29 +88,30 @@ function Lobby() {
     fontFamily: `Quicksand, sans-serif`
   };
 
-  const leave = async e => {
-    if (isHost) {
-      try {
-        const endReq = new ApiEndpoint(`/api/game/${gameId}/end/${myId}`);
-        const endData = await endReq.postReq({});
-      } catch (e) {
-        console.log(e);
+  async function leave(e){
+    errorHandler(async () => {
+      if (isHost) {
+        try {
+          const endReq = new ApiEndpoint(`/api/game/${gameId}/end/${myId}`);
+          const endData = await endReq.postReq({});
+        } catch (e) {
+          console.log(e);
+        }
+      } else {
+        try {
+          const leaveReq = new ApiEndpoint(`/api/game/${gameId}/leave/${myId}`);
+          const leaveData = await leaveReq.postReq({});
+        } catch (e) {
+          console.log(e);
+        }
       }
-    } else {
-      try {
-        const leaveReq = new ApiEndpoint(`/api/game/${gameId}/leave/${myId}`);
-        const leaveData = await leaveReq.postReq({});
-      } catch (e) {
-        console.log(e);
-      }
-    }
-    socket.close();
-  };
+      socket.close();
+    })();
+  }
 
   async function initializeLobby() {
-    socket.emit("join", { gameId: gameId });
-
-    try {
+    errorHandler(async () => {
+      socket.emit("join", { gameId: gameId });
       const joinReq = new ApiEndpoint(`/api/game/${gameId}`);
       const joinData = await joinReq.postReq({ name: login.user_name });
       const playersData = await new ApiEndpoint(
@@ -121,10 +123,7 @@ function Lobby() {
       setPlayers(playersData.players);
       setIsHost(playersData.players[index].is_host);
       setMyId(playersData.players[index].id);
-    } catch (e) {
-      console.log(e);
-      setErr(e);
-    }
+    })();
   }
 
   async function handleClick() {
@@ -207,17 +206,6 @@ function Lobby() {
 
   useEffect(
     () => {
-      if (err !== null) {
-        setTimeout(() => {
-          history.push("/gamesList");
-        }, 2000);
-      }
-    },
-    [err]
-  );
-
-  useEffect(
-    () => {
       if (chatToggle) {
         lobbyContainer.current.style.filter = "blur(1em)";
         // quitButton.current.style.filter = 'blur(1em)';
@@ -285,7 +273,6 @@ function Lobby() {
 
       {hasEnded && <div style={endedStyle}>Host has ended game</div>}
 
-      {err && <div style={endedStyle}>{err}</div>}
     </React.Fragment>
   );
 }

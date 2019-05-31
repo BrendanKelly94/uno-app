@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
 import history from "./utils/history.js";
 import ApiEndpoint from "./utils/ApiEndpoint.js";
+import useError from "./utils/useError.js";
 import Button from "./Button";
 
 function GamesList() {
   const [state, setState] = useState({
     games: [],
-    error: null,
     isFirst: true
   });
+  const [ error, errorHandler ] = useError();
 
   const headingStyle = {
     textAlign: "center",
@@ -64,14 +65,12 @@ function GamesList() {
   }
 
   async function initializeList() {
-    if (state.isFirst) {
-      const gamesData = await new ApiEndpoint("/api/games").getReq();
-      if(!gamesData.err) {
+    errorHandler(async () => {
+      if (state.isFirst) {
+        const gamesData = await new ApiEndpoint("/api/games").getReq();
         setState({ ...state, games: gamesData.games, isFirst: false });
-      }else{
-        setState({ ...state, error: gamesData.err, isFirst: false });
       }
-    }
+    })();
   }
 
   //cdm
@@ -79,7 +78,7 @@ function GamesList() {
     initializeList();
   });
 
-  const { games, error } = state;
+  const { games } = state;
   return (
     <React.Fragment>
       <Button

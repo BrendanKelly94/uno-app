@@ -15,7 +15,8 @@ const Player = React.memo(
     rotate,
     scale,
     turnId,
-    currentMessage
+    currentMessage,
+    errorHandler
   }) => {
     const [cardCount, setCardCount] = useState(7);
     const [isMyTurn, setIsMyTurn] = useState(false);
@@ -52,7 +53,7 @@ const Player = React.memo(
     };
 
     async function updatePlayerState() {
-      try {
+      errorHandler(async () => {
         if (
           pId === playerStatus.id &&
           playerStatus.isAnimating &&
@@ -85,9 +86,8 @@ const Player = React.memo(
             }
           });
         }
-      } catch (e) {
-        console.log(e);
-      }
+      })();
+
     }
 
     useEffect(

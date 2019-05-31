@@ -4,6 +4,11 @@ module.exports = function(io) {
   const router = express.Router();
   const queries = require("../db/queries.js");
   const AsyncHandler = require("../AsyncHandler.js")
+  const NotAuthorized = require('../errors/NotAuthorized.js');
+  const NotFound = require('../errors/NotFound.js');
+  const NotKnown = require('../errors/NotKnown.js');
+  const CustomError = require('../errors/CustomError.js');
+
 
   //retrieve games
   router.get("/games", AsyncHandler(async (req, res, next) => {
@@ -15,7 +20,6 @@ module.exports = function(io) {
   router.get("/game/:id", AsyncHandler(async (req, res, next) => {
     const id = parseInt(req.params["id"], 10);
     const game = await queries.findGame({ gameId: id });
-    if(!game) throw new Error("Game does not exist");
     res.send({ game: game });
   }));
 
@@ -23,7 +27,6 @@ module.exports = function(io) {
   router.get("/game/:id/players", AsyncHandler(async (req, res, next) => {
     const id = parseInt(req.params["id"], 10);
     const players = await queries.getPlayers({ gameId: id });
-    if(!players) throw new Error("Something went wrong");
     res.send({ players: players });
   }));
 
@@ -31,15 +34,13 @@ module.exports = function(io) {
   router.get("/getCardInPlay/:gameId", AsyncHandler(async (req, res, next) => {
     const gameId = parseInt(req.params["gameId"], 10);
     const cIP = await queries.getCardInPlay({ gameId: gameId });
-    if(!cIP[0]) throw new Error("Something went wrong")
-    res.send({ card: cIP[0] });
+    res.send({ card: cIP });
   }));
 
   //retrieve hand
   router.get("/getHand/:playerId", AsyncHandler(async (req, res, next) => {
     const playerId = parseInt(req.params["playerId"], 10);
     const hand = await queries.getHand({ playerId: playerId });
-    if(!hand) throw new Error("Something went wrong")
     res.send({ hand: hand });
   }));
 
@@ -48,25 +49,28 @@ module.exports = function(io) {
     const botFill = req.body.botFill;
     const userName = req.body.userName;
 
-    const player = await queries.findPlayer({ name: userName });
-    //if player is already in a game: delete the past game
-    if (player) {
-      const remove = await queries.removeGame({ gameId: player.game_id });
+    //findPlayer will throw error if no player is found
+    let player = false;
+    try{
+      player = await queries.findPlayer({ name: userName });
+    }catch(e){
+      //if no player is found continue creating game
     }
+    if(player) await queries.removeGame({ gameId: player.game_id });
 
     const id = await queries.createGame({ botFill: botFill });
-    await queries.generateDeck({ gameId: id[0] });
+    await queries.generateDeck({ gameId: id });
 
     if (botFill) {
-      const bots = await queries.fillBots({ gameId: id[0] });
+      const bots = await queries.fillBots({ gameId: id });
       for (let i = 0; i < bots.length; i++) {
         await queries.generateHand({
-          gameId: id[0],
+          gameId: id,
           playerId: bots[i]
         });
       }
     }
-    res.send({ id: id[0] });
+    res.send({ id: id });
   }));
 
   //join game
@@ -87,10 +91,10 @@ module.exports = function(io) {
       });
       await queries.generateHand({
         gameId: gameId,
-        playerId: playerId[0]
+        playerId: playerId
       });
       gameIo.to(gameId).emit("newPlayer", { id: playerId });
-      res.send({ id: playerId[0] });
+      res.send({ id: playerId });
     }
   }));
 
@@ -102,14 +106,14 @@ module.exports = function(io) {
     if (host.is_host) {
       await queries.setHasStarted({ gameId: gameId });
       await queries.setFirstCardInPlay({ gameId: gameId });
-      const setTurn = await queries.setTurn({
+      const turn = await queries.setTurn({
         gameId: gameId,
         playerId: host.id
       });
       gameIo.to(gameId).emit("start", {});
       res.send({ id: host.id });
     } else {
-      throw new Error("You are not the host");
+      throw new NotAuthorized();
     }
   }));
 
@@ -131,8 +135,7 @@ module.exports = function(io) {
       const handCount = await queries.getPlayerHandCount({
         playerId: playerId
       });
-      const count = parseInt(handCount[0].count, 10);
-      res.send({ count: count });
+      res.send({ count: handCount });
     })
   );
 
@@ -142,11 +145,12 @@ module.exports = function(io) {
       const gameId = parseInt(req.params["gameId"], 10);
       const players = await queries.getPlayers({ gameId: gameId });
       const countArray = [];
+      //write a smarter query instead of looping
       for (let i = 0; i < players.length; i++) {
         const handCount = await queries.getPlayerHandCount({
           playerId: players[i].id
         });
-        players[i].cardCount = parseInt(handCount[0].count, 10);
+        players[i].cardCount = parseInt(handCount, 10);
       }
       res.send({ players: players });
     })
@@ -164,9 +168,8 @@ module.exports = function(io) {
 
       if (cId !== -1) {
         if (color !== undefined) {
-          const cChange = await queries.changeColor({ cId: cId, color: color });
+          await queries.changeColor({ cId: cId, color: color });
         }
-
         card = await queries.getCard({ cardId: cId });
         newCards = await hasNewCards({
           card: card,
@@ -219,7 +222,7 @@ module.exports = function(io) {
         gameId: gameId,
         playerId: playerId
       });
-      const drawCard = await queries.getCard({ cardId: drawCardId[0] });
+      const drawCard = await queries.getCard({ cardId: drawCardId });
       res.send({ card: drawCard });
     })
   );
@@ -295,7 +298,7 @@ module.exports = function(io) {
         return nextTurn;
       }
     } catch (e) {
-      throw new Error(e);
+      throw e;
     }
   }
 
@@ -385,14 +388,14 @@ module.exports = function(io) {
         }, offset);
       }
     } catch (e) {
-      throw new Error(e);
+      throw e;
     }
 
     return true;
   }
 
   async function findAndReplacePlayer(gameId, name){
-
+    try{
       const players = await queries.getPlayers({ gameId: gameId });
       let found = -1;
       let allbots = true;
@@ -405,19 +408,18 @@ module.exports = function(io) {
           allbots = false;
         }
       }
-      if (found !== -1) {
-        const pId = await queries.replacePlayer({
-          playerId: players[found].id,
-          name: name
-        });
-        if (allbots) {
-          await queries.setHost({ name: name });
-        }
-        return pId[0];
-      } else {
-        //if no available spot
-        throw new Error("Game is full");
+      if(found === -1) throw new CustomError({status: 200, message: "Game is Full"});
+      const pId = await queries.replacePlayer({
+        playerId: players[found].id,
+        name: name
+      });
+      if (allbots) {
+        await queries.setHost({ name: name });
       }
+      return pId;
+    }catch(e){
+      throw e
+    }
   }
 
   async function hasWon({ gameId: gameId, playerId: playerId }) {
@@ -426,7 +428,7 @@ module.exports = function(io) {
         playerId: playerId
       });
       const player = await queries.getPlayer({ playerId: playerId });
-      if (handCount[0].count === "0") {
+      if (handCount === "0") {
         gameIo
           .to(gameId)
           .emit("playerWon", {
@@ -438,7 +440,7 @@ module.exports = function(io) {
         return false;
       }
     } catch (e) {
-      console.log(e);
+      throw e;
     }
   }
 
@@ -462,9 +464,9 @@ module.exports = function(io) {
       const options = hand.filter((card, id) => {
         if (card.value > 12) {
           return true;
-        } else if (card.color === cardInPlay[0].color) {
+        } else if (card.color === cardInPlay.color) {
           return true;
-        } else if (card.value === cardInPlay[0].value) {
+        } else if (card.value === cardInPlay.value) {
           return true;
         } else {
           return false;
@@ -472,8 +474,7 @@ module.exports = function(io) {
       });
       return options;
     } catch (e) {
-      console.log(e);
-      return false;
+      throw e;
     }
   }
 
@@ -494,7 +495,7 @@ module.exports = function(io) {
       const playerId = parseInt(req.params["playerId"], 10);
       const result = await queries.removeGame({ gameId: gameId });
       gameIo.to(gameId).emit("end", { message: "game has ended by host" });
-      res.send({ gameId: result[0] });
+      res.send({ gameId: result });
     })
   );
 

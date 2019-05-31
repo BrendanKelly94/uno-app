@@ -3,6 +3,7 @@ import { TweenLite, TimelineLite, TimelineMax } from "gsap";
 import gameStoreContext from "./context/gameStoreContext";
 import authStoreContext from "./context/authStoreContext";
 import useScale from "./utils/useScale";
+import useError from "./utils/useError";
 import BuildPlayers from "./utils/BuildPlayers";
 import FindInitTransform from "./utils/FindInitTransform";
 import InitialState from "./utils/InitialState";
@@ -15,6 +16,7 @@ import Hand from "./Hand";
 import HandCard from "./HandCard";
 import Card from "./Card";
 import DrawCard from "./DrawCard";
+import Error from "./Error";
 import io from "socket.io-client";
 import history from "./utils/history";
 
@@ -47,8 +49,9 @@ function App() {
   const [wonName, setWonName] = useState(null);
 
   const scaleFactor = useScale();
+  const [error, errorHandler] = useError(); //errorHandler is curried
   const newCardRef = useRef(null);
-  
+
   const first = null;
   const location = history.location.pathname.split("/");
   const gameId = location[location.length - 1];
@@ -107,19 +110,21 @@ function App() {
   //functions
 
   async function rebuildPlayers() {
-    const playersData = await new ApiEndpoint(
-      `/api/getPlayersWithCount/${gameId}`
-    ).getReq();
-    const shift = BuildPlayers({
-      players: playersData.players,
-      username: login.user_name,
-      scaleFactor: scaleFactor
-    });
-    setShiftedPlayers(shift);
+    errorHandler(async () => {
+      const playersData = await new ApiEndpoint(
+        `/api/getPlayersWithCount/${gameId}`
+      ).getReq();
+      const shift = BuildPlayers({
+        players: playersData.players,
+        username: login.user_name,
+        scaleFactor: scaleFactor
+      });
+      setShiftedPlayers(shift);
+    })();
   }
 
   async function leave(e) {
-    try {
+    errorHandler(async () => {
       if (isHost) {
         const endReq = new ApiEndpoint(`/api/game/${gameId}/end/${myId}`);
         const endData = await endReq.postReq();
@@ -129,13 +134,11 @@ function App() {
         history.push("/gamesList");
       }
       socket.close();
-    } catch (e) {
-      console.log(e);
-    }
+    })();
   }
 
   async function submitCard({ cId, color, hasDrawn }) {
-    try {
+    errorHandler(async () => {
       const submitEnd = new ApiEndpoint(
         `/api/game/${gameId}/submitCard/${myId}`
       );
@@ -146,18 +149,15 @@ function App() {
       });
       const handData = await new ApiEndpoint(`/api/getHand/${myId}`).getReq();
       setHand(handData.hand);
-    } catch (e) {
-      console.log(e);
-    }
+    })();
   }
 
   async function drawCard() {
-    try {
+    errorHandler(async () => {
       const drawData = await new ApiEndpoint(
         `/api/game/${gameId}/drawCard/${myId}`
       ).getReq();
       const handData = await new ApiEndpoint(`/api/getHand/${myId}`).getReq();
-
       setPlayerStatus({ id: myId, isAnimating: false, isDrawing: true });
       tl.to("#draw-card", 0.5, {
         onComplete: () => {
@@ -165,35 +165,31 @@ function App() {
           setHand(handData.hand);
         }
       });
-
       return drawData.card;
-    } catch (e) {
-      console.log(e);
-    }
+    })();
   }
 
   async function cardsGiven({ playerId, myId }) {
-    if (playerId === myId) {
-      try {
+    errorHandler(async () => {
+      if (playerId === myId) {
         const handData = await new ApiEndpoint(`/api/getHand/${myId}`).getReq();
         setHand(handData.hand);
-      } catch (e) {
-        console.log(e);
+      } else {
+        setPlayerStatus({ id: playerId, isAnimating: false, isDrawing: false });
+        tl.to(`player-${playerId}-card-0`, 0.5, {
+          onComplete: () => {
+            setPlayerStatus({ id: null, isAnimating: false, isDrawing: false });
+          }
+        });
       }
-    } else {
-      setPlayerStatus({ id: playerId, isAnimating: false, isDrawing: false });
-      tl.to(`player-${playerId}-card-0`, 0.5, {
-        onComplete: () => {
-          setPlayerStatus({ id: null, isAnimating: false, isDrawing: false });
-        }
-      });
-    }
+    })();
   }
 
   async function initializeGame() {
-    let mId;
-    try {
+    errorHandler(async () => {
+      let mId;
       const gameData = await new ApiEndpoint(`/api/game/${gameId}`).getReq();
+      //intentional error below!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       const playersData = await new ApiEndpoint(
         `/api/getPlayersWithCount/${gameId}`
       ).getReq();
@@ -221,9 +217,7 @@ function App() {
       });
       setHand(handData.hand);
       setMiddleCard(cIPData.card);
-    } catch (e) {
-      console.log(e);
-    }
+    })();
   }
 
   //lifecycle hooks
@@ -241,8 +235,9 @@ function App() {
       if (myId !== null) {
         socket.emit("join", { gameId: gameId });
         //socket events
-        socket.on("newTurn", async data => {
-          try {
+        socket.on(
+          "newTurn",
+          errorHandler( async (data) => {
             if (data.newCards.status) {
               await cardsGiven({ playerId: data.newCards.id, myId: myId });
             }
@@ -258,13 +253,12 @@ function App() {
               lastTurnId: data.lastTurn,
               newCard: data.card
             });
-          } catch (e) {
-            console.log(e);
-          }
-        });
+          })
+        );
 
-        socket.on("playerLeft", async data => {
-          try {
+        socket.on(
+          "playerLeft",
+          errorHandler(async (data) => {
             const playersData = await new ApiEndpoint(
               `/api/getPlayersWithCount/${gameId}`
             ).getReq();
@@ -276,21 +270,15 @@ function App() {
                 scaleFactor: scaleFactor
               })
             );
-          } catch (e) {
-            console.log(e);
-          }
-        });
+          })
+        );
 
         socket.on("end", data => {
           setHasEnded(true);
         });
 
-        socket.on("playerWon", async data => {
-          try {
-            setWonName(data.user_name);
-          } catch (e) {
-            console.log(e);
-          }
+        socket.on("playerWon", data => {
+          setWonName(data.user_name);
         });
       }
     },
@@ -444,6 +432,7 @@ function App() {
             rotate={player.rotate}
             scale={scaleFactor.size}
             currentMessage={currentMessage}
+            errorHandler = {errorHandler}
           />
         ))}
 
@@ -470,6 +459,7 @@ function App() {
           submitCard={submitCard}
           drawCard={drawCard}
           isAnimating={playerStatus.isAnimating}
+          errorHandler = {errorHandler}
         />
 
         <HandCard
@@ -513,6 +503,8 @@ function App() {
         scale={scaleFactor.size}
         setCurrentMessage={setCurrentMessage}
       />
+
+      {error.status && <Error status={error.status} message={error.message} />}
 
       {hasEnded && <div style={endedStyle}>Host has Ended Game</div>}
 

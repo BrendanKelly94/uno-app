@@ -18,7 +18,8 @@ const Hand = React.memo(
     scaleFactor,
     drawCard,
     submitCard,
-    isAnimating
+    isAnimating,
+    errorHandler
   }) => {
     const [options, setOptions] = useState([]);
     const [prevCount, setPrevCount] = useState(hand.length);
@@ -80,14 +81,14 @@ const Hand = React.memo(
     }
 
     async function handleDrawClick() {
-      if (
-        isMyTurn &&
-        !isAnimating &&
-        !hasDrawn.status &&
-        !colorChange.status &&
-        !hasSubmitted
-      ) {
-        try {
+      errorHandler(async () => {
+        if (
+          isMyTurn &&
+          !isAnimating &&
+          !hasDrawn.status &&
+          !colorChange.status &&
+          !hasSubmitted
+        ) {
           setHasSubmitted(true);
           const card = await drawCard();
           tl.to(".hand-card", 0.5, {
@@ -95,10 +96,8 @@ const Hand = React.memo(
               setHasDrawn({ status: true, card: card });
             }
           });
-        } catch (e) {
-          console.log(e);
         }
-      }
+      })();
     }
 
     function handleColorChange(color) {
@@ -144,8 +143,9 @@ const Hand = React.memo(
     }
 
     async function isMyTurnUpdate() {
-      if (isMyTurn && myId !== null) {
-        try {
+      errorHandler(async () => {
+        throw new Error("intentional error hand")
+        if (isMyTurn && myId !== null) {
           const optionsData = await new ApiEndpoint(
             `/api/game/${gameId}/getHandOptions/${myId}`
           ).getReq();
@@ -157,15 +157,13 @@ const Hand = React.memo(
             tl.to(selector, 0.5, { yPercent: -50 });
           }
           setOptions(optionsData.options);
-        } catch (e) {
-          console.log(e);
         }
-      }
+      })();
     }
 
     async function hasDrawnUpdate() {
-      if (hasDrawn.status) {
-        try {
+      errorHandler(async () => {
+        if (hasDrawn.status) {
           const optionsData = await new ApiEndpoint(
             `/api/game/${gameId}/getHandOptions/${myId}`
           ).getReq();
@@ -183,10 +181,8 @@ const Hand = React.memo(
           } else {
             submitCardAction({ cardId: -1 });
           }
-        } catch (e) {
-          console.log(e);
         }
-      }
+      })();
     }
 
     useEffect(

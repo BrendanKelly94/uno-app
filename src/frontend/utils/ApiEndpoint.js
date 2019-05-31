@@ -4,9 +4,10 @@ function ApiEndpoint(uri) {
     try {
       const res = await fetch(this.uri);
       const json = await res.json();
+      if(json.status) throw json;
       return json;
     } catch (e) {
-      throw new Error(e);
+      throw e;
     }
   };
   this.postReq = async json => {
@@ -20,9 +21,10 @@ function ApiEndpoint(uri) {
         body: JSON.stringify(json)
       });
       const rJson = await res.json();
+      if(rJson.status) throw rJson;
       return rJson;
     } catch (e) {
-      throw new Error(e);
+      throw e;
     }
   };
 }

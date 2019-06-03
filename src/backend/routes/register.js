@@ -1,31 +1,30 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const bcrypt = require('bcrypt');
-const queries = require('../db/queries');
-const knex = require('../db/knex.js');
+const bcrypt = require("bcrypt");
+const queries = require("../db/queries");
+const knex = require("../db/knex.js");
+const AsyncHandler = require("../AsyncHandler.js");
+const CustomError = require("../errors/CustomError.js");
 
 /* GET home page. */
-router.post('/', (req, res, next) => {
+router.post("/", AsyncHandler((req, res, next) => {
   const name = req.body.name;
   const pwd = req.body.pwd;
 
-  if(pwd.length < 1){
-    res.json({err: 'Password cannot be empty'})
+  if (pwd.length < 1) {
+    throw new CustomError({status: 200, message: "Password cannot be empty"})
   }
 
-  if(name !== 'bot'){
-    bcrypt.hash(pwd, 1, async (err, hash) => {
-      try{
-        const result = await queries.addUser({name: name, pwd: hash});
-      }catch(e){
-        res.json({err: e});
-      }
-      res.json({name: name});
+  if (name !== "bot") {
+    bcrypt.hash(pwd, 1).then(async (hash) => {
+      const result = await queries.Users.addUser({ name: name, pwd: hash });
+    }).catch(e => {
+      next(e);
     })
-  }else{
-    res.json({err: 'username bot is not valid'});
-  }
 
-});
+  } else {
+    throw new CustomError({status: 200, message: "Username bot is not valid"})
+  }
+}));
 
 module.exports = router;

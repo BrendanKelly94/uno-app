@@ -1,29 +1,37 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const bcrypt = require('bcrypt');
-const queries = require('../db/queries');
+const bcrypt = require("bcrypt");
+const queries = require("../db/queries");
+const AsyncHandler = require("../AsyncHandler.js");
+const CustomError = require("../errors/CustomError.js");
 
 /* GET home page. */
-router.post('/', async (req, res, next) => {
+router.post("/", AsyncHandler(async (req, res, next) => {
   const name = req.body.name;
   const inputPwd = req.body.pwd;
 
-  if(name !== 'bot'){
-    const databasePwd = await queries.findUser({name: name});
-    if(databasePwd.length < 1){
-        res.json({err: 'An account was not found for this user'});
-    }else{
-      bcrypt.compare(inputPwd, databasePwd[0].pwd, (err,result,body) => {
-        if(result){
-          res.json({name: name});
-        }else{
-          res.json({err: 'username or password incorrect'});
-        }
-      });
+  if (name !== "bot") {
+    let databasePwd;
+    try{
+      databasePwd = await queries.Users.findUser({ name: name });
+    }catch(e){
+      throw new CustomError({status: 200, message: "An account was not found for this user"})
     }
-  }else{
-    res.json({err: 'cannot login as bot'})
+
+    bcrypt.compare(inputPwd, databasePwd.pwd).then((result) => {
+      if (result) {
+        res.json({ name: name });
+      }else{
+        throw new CustomError({status: 200, message: "username or password incorrect"})
+      }
+    }).catch((e) => {
+      next(e);
+    });
+
+  }else {
+    throw new CustomError({status: 200, message: "cannot log in as bot"})
+
   }
-});
+}));
 
 module.exports = router;

@@ -5,7 +5,8 @@ function useError () {
 
   const errorHandler = fn => (params) => {
     Promise.resolve(fn(params)).catch(err => {
-      setError(err);
+      if(!err.status) err.status = 500;
+      setError({status: err.status, message: err.message});
     })
   }
 

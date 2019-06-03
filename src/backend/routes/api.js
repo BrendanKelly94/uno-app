@@ -12,35 +12,35 @@ module.exports = function(io) {
 
   //retrieve games
   router.get("/games", AsyncHandler(async (req, res, next) => {
-      const games = await queries.getGames();
+      const games = await queries.Games.getGames();
       res.send({ games: games });
   }));
 
   //get game
-  router.get("/game/:id", AsyncHandler(async (req, res, next) => {
-    const id = parseInt(req.params["id"], 10);
-    const game = await queries.findGame({ gameId: id });
+  router.get("/game/:id(\\d+)", AsyncHandler(async (req, res, next) => {
+    const id = Number(req.params["id"]);
+    const game = await queries.Games.findGame({ gameId: id });
     res.send({ game: game });
   }));
 
   //retrieve players in game
-  router.get("/game/:id/players", AsyncHandler(async (req, res, next) => {
-    const id = parseInt(req.params["id"], 10);
-    const players = await queries.getPlayers({ gameId: id });
+  router.get("/game/:id(\\d+)/players", AsyncHandler(async (req, res, next) => {
+    const id = Number(req.params["id"]);
+    const players = await queries.Players.getPlayers({ gameId: id });
     res.send({ players: players });
   }));
 
   //retrieve card in middle
-  router.get("/getCardInPlay/:gameId", AsyncHandler(async (req, res, next) => {
-    const gameId = parseInt(req.params["gameId"], 10);
-    const cIP = await queries.getCardInPlay({ gameId: gameId });
+  router.get("/getCardInPlay/:gameId(\\d+)", AsyncHandler(async (req, res, next) => {
+    const gameId = Number(req.params["gameId"]);
+    const cIP = await queries.GameCards.getCardInPlay({ gameId: gameId });
     res.send({ card: cIP });
   }));
 
   //retrieve hand
-  router.get("/getHand/:playerId", AsyncHandler(async (req, res, next) => {
-    const playerId = parseInt(req.params["playerId"], 10);
-    const hand = await queries.getHand({ playerId: playerId });
+  router.get("/getHand/:playerId(\\d+)", AsyncHandler(async (req, res, next) => {
+    const playerId = Number(req.params["playerId"]);
+    const hand = await queries.GameCards.getHand({ playerId: playerId });
     res.send({ hand: hand });
   }));
 
@@ -52,19 +52,19 @@ module.exports = function(io) {
     //findPlayer will throw error if no player is found
     let player = false;
     try{
-      player = await queries.findPlayer({ name: userName });
+      player = await queries.Players.findPlayer({ name: userName });
     }catch(e){
       //if no player is found continue creating game
     }
-    if(player) await queries.removeGame({ gameId: player.game_id });
+    if(player) await queries.Games.removeGame({ gameId: player.game_id });
 
-    const id = await queries.createGame({ botFill: botFill });
-    await queries.generateDeck({ gameId: id });
+    const id = await queries.Games.createGame({ botFill: botFill });
+    await queries.GameCards.generateDeck({ gameId: id });
 
     if (botFill) {
-      const bots = await queries.fillBots({ gameId: id });
+      const bots = await queries.Games.fillBots({ gameId: id });
       for (let i = 0; i < bots.length; i++) {
-        await queries.generateHand({
+        await queries.GameCards.generateHand({
           gameId: id,
           playerId: bots[i]
         });
@@ -74,22 +74,22 @@ module.exports = function(io) {
   }));
 
   //join game
-  router.post("/game/:id", AsyncHandler(async (req, res, next) => {
-    const gameId = parseInt(req.params["id"], 10);
+  router.post("/game/:id(\\d+)", AsyncHandler(async (req, res, next) => {
+    const gameId = Number(req.params["id"]);
     const name = req.body.name;
-    const game = await queries.findGame({ gameId: gameId });
+    const game = await queries.Games.findGame({ gameId: gameId });
 
     //if game is full and there are bots replace a bot with a player
     if (game.player_count === 6 && game.bot_fill === true) {
-      const pId = await findAndReplacePlayer(gameId, name);
+      const pId = await queries.Players.findAndReplacePlayer({gameId: gameId, name: name});
       gameIo.to(gameId).emit("newPlayer", { id: pId });
       res.send({ id: pId });
     } else {
-      const playerId = await queries.addPlayer({
+      const playerId = await queries.Players.addPlayer({
         gameId: gameId,
         name: name
       });
-      await queries.generateHand({
+      await queries.GameCards.generateHand({
         gameId: gameId,
         playerId: playerId
       });
@@ -99,14 +99,14 @@ module.exports = function(io) {
   }));
 
   // start game
-  router.post("/game/:id/start", AsyncHandler(async (req, res, next) => {
-    const gameId = parseInt(req.params["id"], 10);
+  router.post("/game/:id(\\d+)/start", AsyncHandler(async (req, res, next) => {
+    const gameId = Number(req.params["id"]);
     const name = req.body.name;
-    const host = await queries.findPlayer({ name: name });
+    const host = await queries.Players.findPlayer({ name: name });
     if (host.is_host) {
-      await queries.setHasStarted({ gameId: gameId });
-      await queries.setFirstCardInPlay({ gameId: gameId });
-      const turn = await queries.setTurn({
+      await queries.Games.setHasStarted({ gameId: gameId });
+      await queries.GameCards.setFirstCardInPlay({ gameId: gameId });
+      const turn = await queries.Games.setTurn({
         gameId: gameId,
         playerId: host.id
       });
@@ -117,11 +117,11 @@ module.exports = function(io) {
     }
   }));
 
-  router.get("/game/:gameId/getHandOptions/:playerId",
+  router.get("/game/:gameId(\\d+)/getHandOptions/:playerId(\\d+)",
     AsyncHandler(async (req, res, next) => {
-      const gameId = parseInt(req.params["gameId"], 10);
-      const playerId = parseInt(req.params["playerId"], 10);
-      const options = await getCardOptions({
+      const gameId = Number(req.params["gameId"]);
+      const playerId = Number(req.params["playerId"]);
+      const options = await queries.GameCards.getCardOptions({
         gameId: gameId,
         playerId: playerId
       });
@@ -129,10 +129,10 @@ module.exports = function(io) {
     })
   );
 
-  router.get("/getPlayerHandCount/:playerId",
+  router.get("/getPlayerHandCount/:playerId(\\d+)",
     AsyncHandler(async (req, res, next) => {
-      const playerId = parseInt(req.params["playerId"], 10);
-      const handCount = await queries.getPlayerHandCount({
+      const playerId = Number(req.params["playerId"]);
+      const handCount = await queries.Players.getPlayerHandCount({
         playerId: playerId
       });
       res.send({ count: handCount });
@@ -140,50 +140,45 @@ module.exports = function(io) {
   );
 
   //get players for the game route
-  router.get("/getPlayersWithCount/:gameId",
+  router.get("/getPlayersWithCount/:gameId(\\d+)",
     AsyncHandler(async (req, res, next) => {
-      const gameId = parseInt(req.params["gameId"], 10);
-      const players = await queries.getPlayers({ gameId: gameId });
+      const gameId = Number(req.params["gameId"]);
+      const players = await queries.Players.getPlayers({ gameId: gameId });
       const countArray = [];
       //write a smarter query instead of looping
       for (let i = 0; i < players.length; i++) {
-        const handCount = await queries.getPlayerHandCount({
+        const handCount = await queries.Players.getPlayerHandCount({
           playerId: players[i].id
         });
-        players[i].cardCount = parseInt(handCount, 10);
+        players[i].cardCount = Number(handCount);
       }
       res.send({ players: players });
     })
   );
 
-  router.post("/game/:id/submitCard/:playerId",
+  router.post("/game/:id(\\d+)/submitCard/:playerId(\\d+)",
     AsyncHandler(async (req, res, next) => {
-      const gameId = parseInt(req.params["id"], 10);
-      const playerId = parseInt(req.params["playerId"], 10);
+      const gameId = Number(req.params["id"]);
+      const playerId = Number(req.params["playerId"]);
       const cId = req.body.cId;
       const color = req.body.color;
       const hasDrawn = req.body.hasDrawn;
-      let nextTurnId, card;
-      let newCards = { status: false, id: null };
+      let nextTurn, card;
 
       if (cId !== -1) {
         if (color !== undefined) {
-          await queries.changeColor({ cId: cId, color: color });
+          await queries.GameCards.changeColor({ cId: cId, color: color });
         }
-        card = await queries.getCard({ cardId: cId });
-        newCards = await hasNewCards({
-          card: card,
-          gameId: gameId,
-          playerId: playerId
-        });
-        nextTurnId = await submitCard({
+        card = await queries.GameCards.getCard({ cardId: cId });
+
+        nextTurn = await queries.GameCards.submitCard({
           gameId: gameId,
           playerId: playerId,
           card: card
         });
       } else {
         card = { id: -1 };
-        nextTurnId = await submitCard({
+        nextTurn = await queries.GameCards.submitCard({
           gameId: gameId,
           playerId: playerId,
           card: card
@@ -193,18 +188,18 @@ module.exports = function(io) {
       gameIo
         .to(gameId)
         .emit("newTurn", {
-          currTurn: nextTurnId,
+          currTurn: nextTurn.id,
           lastTurn: playerId,
           card: card,
-          newCards: { status: newCards.status, id: newCards.id }
+          newCards: nextTurn.newCards
         });
 
-      const playerWon = await hasWon({ gameId: gameId, playerId: playerId });
-      const nextPlayer = await queries.getPlayer({ playerId: nextTurnId });
+      const playerWon = await queries.Players.hasWon({ gameId: gameId, playerId: playerId });
+      const nextPlayer = await queries.Players.getPlayer({ playerId: nextTurn.id });
 
       //call recursive submit bot turn if next player is bot
       if (nextPlayer.is_bot && !playerWon) {
-        await submitBotTurn({
+        await submitBotTurns({
           gameId: gameId,
           playerId: nextPlayer.id,
           offset: 3000
@@ -214,178 +209,93 @@ module.exports = function(io) {
     })
   );
 
-  router.get("/game/:id/drawCard/:playerId",
+  router.get("/game/:id(\\d+)/drawCard/:playerId(\\d+)",
     AsyncHandler(async (req, res, next) => {
-      const gameId = parseInt(req.params["id"], 10);
-      const playerId = parseInt(req.params["playerId"], 10);
-      const drawCardId = await queries.drawCard({
+      const gameId = Number(req.params["id"]);
+      const playerId = Number(req.params["playerId"]);
+      const drawCardId = await queries.GameCards.drawCard({
         gameId: gameId,
         playerId: playerId
       });
-      const drawCard = await queries.getCard({ cardId: drawCardId });
+      const drawCard = await queries.GameCards.getCard({ cardId: drawCardId });
       res.send({ card: drawCard });
     })
   );
 
-  async function submitCard({ gameId, playerId, card }) {
-    let nextTurn;
-    const cId = card.id;
-    try {
-      if (cId === -1) {
-        nextTurn = await queries.nextTurn({ gameId: gameId, isSkip: false });
-        return nextTurn;
-      } else if (card.value > 9) {
-        switch (card.value) {
-          case 10: //switch direction
-            await queries.flipDirection({ gameId: gameId });
-            await queries.setCardInPlay({
-              gameId: gameId,
-              playerId: playerId,
-              cId: cId
-            });
-            nextTurn = await queries.nextTurn({
-              gameId: gameId,
-              isSkip: false
-            });
-            break;
-          case 11: //skip
-            await queries.setCardInPlay({
-              gameId: gameId,
-              playerId: playerId,
-              cId: cId
-            });
-            nextTurn = await queries.nextTurn({ gameId: gameId, isSkip: true });
-            break;
-          case 12: //give 2 & skip
-            const give2Id = await queries.giveCards({ gameId: gameId, num: 2 });
-            await queries.setCardInPlay({
-              gameId: gameId,
-              playerId: playerId,
-              cId: cId
-            });
-            nextTurn = await queries.nextTurn({ gameId: gameId, isSkip: true });
-            break;
-          case 13: // wild card
-            //color selection will happen on front end
-            await queries.setCardInPlay({
-              gameId: gameId,
-              playerId: playerId,
-              cId: cId
-            });
-            nextTurn = await queries.nextTurn({
-              gameId: gameId,
-              isSkip: false
-            });
-            break;
-          case 14: // wild card give 4
-            const give4Id = await queries.giveCards({ gameId: gameId, num: 4 });
-            await queries.setCardInPlay({
-              gameId: gameId,
-              playerId: playerId,
-              cId: cId
-            });
-            nextTurn = await queries.nextTurn({ gameId: gameId, isSkip: true });
-            break;
-        }
-        return nextTurn;
-      } else {
-        await queries.setCardInPlay({
-          gameId: gameId,
-          playerId: playerId,
-          cId: cId
-        });
-        nextTurn = await queries.nextTurn({ gameId: gameId, isSkip: false });
-        return nextTurn;
-      }
-    } catch (e) {
-      throw e;
-    }
-  }
 
-  async function submitBotTurn({ gameId, playerId, offset }) {
+  async function submitBotTurns({ gameId, playerId, offset }) {
     try {
-      const player = await queries.getPlayer({ playerId: playerId });
+      const player = await queries.Players.getPlayer({ playerId: playerId });
       if (player.is_bot) {
-        setTimeout(async () => {
-          let newCards, card, nextTurn;
-          let hasDrawn = false;
-          const colors = ["red", "blue", "green", "yellow"];
-          const options = await getCardOptions({
-            gameId: gameId,
-            playerId: playerId
-          });
-
-          if (options.length > 0) {
-            const randomCard =
-              options[Math.floor(Math.random() * options.length)];
-            newCards = await hasNewCards({
-              card: randomCard,
-              gameId: gameId,
-              playerId: playerId
-            });
-            nextTurn = await submitCard({
-              gameId: gameId,
-              playerId: playerId,
-              card: randomCard
-            });
-            card = await queries.getCard({ cardId: randomCard.id });
-          } else {
-            const drawCardId = await queries.drawCard({
-              gameId: gameId,
-              playerId: playerId
-            });
-            const newOptions = await getCardOptions({
+          setTimeout(async () => {
+            let card, nextTurn;
+            let hasDrawn = false;
+            const colors = ["red", "blue", "green", "yellow"];
+            const options = await queries.GameCards.getCardOptions({
               gameId: gameId,
               playerId: playerId
             });
 
-            if (newOptions.length > 0) {
-              hasDrawn = true;
-              newCards = await hasNewCards({
-                card: newOptions[0],
+            if (options.length > 0) {
+              const randomCard =
+                options[Math.floor(Math.random() * options.length)];
+              nextTurn = await queries.GameCards.submitCard({
+                gameId: gameId,
+                playerId: playerId,
+                card: randomCard
+              });
+              card = await queries.GameCards.getCard({ cardId: randomCard.id });
+            } else {
+              const drawCardId = await queries.GameCards.drawCard({
                 gameId: gameId,
                 playerId: playerId
               });
-              nextTurn = await submitCard({
+              const newOptions = await queries.GameCards.getCardOptions({
                 gameId: gameId,
-                playerId: playerId,
-                card: newOptions[0]
+                playerId: playerId
               });
-              card = await queries.getCard({ cardId: newOptions[0].id });
+
+              if (newOptions.length > 0) {
+                hasDrawn = true;
+                nextTurn = await queries.GameCards.submitCard({
+                  gameId: gameId,
+                  playerId: playerId,
+                  card: newOptions[0]
+                });
+                card = await queries.GameCards.getCard({ cardId: newOptions[0].id });
+              } else {
+                card = { id: -1 };
+                nextTurn = await queries.GameCards.submitCard({
+                  gameId: gameId,
+                  playerId: playerId,
+                  card: card
+                });
+              }
+            }
+
+            gameIo
+              .to(gameId)
+              .emit("newTurn", {
+                currTurn: nextTurn.id,
+                lastTurn: playerId,
+                card: card,
+                newCards: nextTurn.newCards,
+                hasDrawn: hasDrawn
+              });
+            const playerWon = await queries.Players.hasWon({
+              gameId: gameId,
+              playerId: playerId
+            });
+            if (playerWon) {
+              return true;
             } else {
-              newCards = { status: false, id: null };
-              card = { id: -1 };
-              nextTurn = await submitCard({
+              return await submitBotTurns({
                 gameId: gameId,
-                playerId: playerId,
-                card: card
+                playerId: nextTurn.id,
+                offset: offset
               });
             }
-          }
-
-          gameIo
-            .to(gameId)
-            .emit("newTurn", {
-              currTurn: nextTurn,
-              lastTurn: playerId,
-              card: card,
-              newCards: { status: newCards.status, id: newCards.id },
-              hasDrawn: hasDrawn
-            });
-          const playerWon = await hasWon({
-            gameId: gameId,
-            playerId: playerId
-          });
-          if (playerWon) {
-            return true;
-          } else {
-            return await submitBotTurn({
-              gameId: gameId,
-              playerId: nextTurn,
-              offset: offset
-            });
-          }
-        }, offset);
+          }, offset)
       }
     } catch (e) {
       throw e;
@@ -394,106 +304,22 @@ module.exports = function(io) {
     return true;
   }
 
-  async function findAndReplacePlayer(gameId, name){
-    try{
-      const players = await queries.getPlayers({ gameId: gameId });
-      let found = -1;
-      let allbots = true;
-      let randomPlayer;
-      for (let i = 0; i < 6; i++) {
-        // randomPlayer = players[Math.floor(Math.random() * players.length)];
-        if (players[i].is_bot) {
-          found = i;
-        } else {
-          allbots = false;
-        }
-      }
-      if(found === -1) throw new CustomError({status: 200, message: "Game is Full"});
-      const pId = await queries.replacePlayer({
-        playerId: players[found].id,
-        name: name
-      });
-      if (allbots) {
-        await queries.setHost({ name: name });
-      }
-      return pId;
-    }catch(e){
-      throw e
-    }
-  }
-
-  async function hasWon({ gameId: gameId, playerId: playerId }) {
-    try {
-      const handCount = await queries.getPlayerHandCount({
-        playerId: playerId
-      });
-      const player = await queries.getPlayer({ playerId: playerId });
-      if (handCount === "0") {
-        gameIo
-          .to(gameId)
-          .emit("playerWon", {
-            playerId: player.id,
-            user_name: player.user_name
-          });
-        return true;
-      } else {
-        return false;
-      }
-    } catch (e) {
-      throw e;
-    }
-  }
-
-  async function hasNewCards({ card, gameId, playerId }) {
-    let player = { id: null };
-    const newCards = card.value === 12 || card.value === 14 ? true : false;
-    if (newCards) {
-      player = await queries.getNextTurn({
-        gameId: gameId,
-        currentTurn: playerId,
-        isSkip: false
-      });
-    }
-    return { status: newCards, id: player.id };
-  }
-
-  async function getCardOptions({ gameId, playerId }) {
-    try {
-      const cardInPlay = await queries.getCardInPlay({ gameId: gameId });
-      const hand = await queries.getHand({ playerId: playerId });
-      const options = hand.filter((card, id) => {
-        if (card.value > 12) {
-          return true;
-        } else if (card.color === cardInPlay.color) {
-          return true;
-        } else if (card.value === cardInPlay.value) {
-          return true;
-        } else {
-          return false;
-        }
-      });
-      return options;
-    } catch (e) {
-      throw e;
-    }
-  }
-
-  router.post("/game/:gameId/leave/:playerId",
+  router.post("/game/:gameId(\\d+)/leave/:playerId(\\d+)",
     AsyncHandler(async (req, res, next) => {
-      const gameId = parseInt(req.params["gameId"], 10);
-      const playerId = parseInt(req.params["playerId"], 10);
-      const game = await queries.findGame({ gameId: gameId });
-      await queries.replacePlayer({ playerId: playerId, name: "bot" });
+      const gameId = Number(req.params["gameId"]);
+      const playerId = Number(req.params["playerId"]);
+      const game = await queries.Games.findGame({ gameId: gameId });
+      await queries.Players.replacePlayer({ playerId: playerId, name: "bot" });
       gameIo.to(gameId).emit("playerLeft", { playerId: playerId });
       res.send({ playerId: playerId });
     })
   );
 
-  router.post("/game/:gameId/end/:playerId",
+  router.post("/game/:gameId(\\d+)/end/:playerId(\\d+)",
     AsyncHandler(async (req, res, next) => {
-      const gameId = parseInt(req.params["gameId"], 10);
-      const playerId = parseInt(req.params["playerId"], 10);
-      const result = await queries.removeGame({ gameId: gameId });
+      const gameId = Number(req.params["gameId"]);
+      const playerId = Number(req.params["playerId"]);
+      const result = await queries.Games.removeGame({ gameId: gameId });
       gameIo.to(gameId).emit("end", { message: "game has ended by host" });
       res.send({ gameId: result });
     })

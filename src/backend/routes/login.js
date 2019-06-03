@@ -13,7 +13,7 @@ router.post("/", AsyncHandler(async (req, res, next) => {
   if (name !== "bot") {
     let databasePwd;
     try{
-      databasePwd = await queries.findUser({ name: name });
+      databasePwd = await queries.Users.findUser({ name: name });
     }catch(e){
       throw new CustomError({status: 200, message: "An account was not found for this user"})
     }

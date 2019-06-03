@@ -144,7 +144,6 @@ const Hand = React.memo(
 
     async function isMyTurnUpdate() {
       errorHandler(async () => {
-        throw new Error("intentional error hand")
         if (isMyTurn && myId !== null) {
           const optionsData = await new ApiEndpoint(
             `/api/game/${gameId}/getHandOptions/${myId}`

@@ -10,6 +10,7 @@ function GamesList() {
     isFirst: true
   });
   const [ error, errorHandler ] = useError();
+  const first = null;
 
   const headingStyle = {
     textAlign: "center",
@@ -76,7 +77,7 @@ function GamesList() {
   //cdm
   useEffect(() => {
     initializeList();
-  });
+  }, [first]);
 
   const { games } = state;
   return (
@@ -113,6 +114,7 @@ function GamesList() {
               </Button>
             </div>
           ))}
+          {error && <div> {error.message}</div>}
         </div>
       </div>
 

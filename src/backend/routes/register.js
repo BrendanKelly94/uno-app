@@ -17,7 +17,7 @@ router.post("/", AsyncHandler((req, res, next) => {
 
   if (name !== "bot") {
     bcrypt.hash(pwd, 1).then(async (hash) => {
-      const result = await queries.addUser({ name: name, pwd: hash });
+      const result = await queries.Users.addUser({ name: name, pwd: hash });
     }).catch(e => {
       next(e);
     })

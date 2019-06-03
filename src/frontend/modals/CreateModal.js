@@ -9,7 +9,7 @@ import ApiEndpoint from "../utils/ApiEndpoint.js";
 
 function CreateModal({ open, setOpen, userName }) {
   const [fillBots, setFillBots] = useState(false);
-  const [error, errorHandler ] = useState(null);
+  const [error, errorHandler ] = useError();
 
   const createGame = async () => {
     errorHandler(async () => {
@@ -59,7 +59,7 @@ function CreateModal({ open, setOpen, userName }) {
             label="fill with bots"
           />
           <Button onClick={createGame}>Create Game</Button>
-          {err.status && <div style = {{color: 'red'}}>{err.message}</div>}
+          {error.status && <div style = {{color: 'red'}}>{error.message}</div>}
         </div>
       </div>
     </Modal>

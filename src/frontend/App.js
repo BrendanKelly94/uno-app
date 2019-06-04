@@ -153,7 +153,7 @@ function App() {
   }
 
   async function drawCard() {
-    errorHandler(async () => {
+      //error handled in Hand
       const drawData = await new ApiEndpoint(
         `/api/game/${gameId}/drawCard/${myId}`
       ).getReq();
@@ -166,7 +166,6 @@ function App() {
         }
       });
       return drawData.card;
-    })();
   }
 
   async function cardsGiven({ playerId, myId }) {

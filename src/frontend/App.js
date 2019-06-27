@@ -20,7 +20,7 @@ import Error from "./Error";
 import io from "socket.io-client";
 import history from "./utils/history";
 
-const socket = io("/game", { transports: ["websocket"], upgrade: false });
+let socket = io("/game", { transports: ["websocket"], upgrade: false, autoConnect: false });
 
 function App() {
   const [login, setLogin] = useContext(authStoreContext);
@@ -188,7 +188,6 @@ function App() {
     errorHandler(async () => {
       let mId;
       const gameData = await new ApiEndpoint(`/api/game/${gameId}`).getReq();
-      //intentional error below!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       const playersData = await new ApiEndpoint(
         `/api/getPlayersWithCount/${gameId}`
       ).getReq();
@@ -232,6 +231,7 @@ function App() {
   useEffect(
     () => {
       if (myId !== null) {
+        socket = io("/game", { transports: ["websocket"], upgrade: false })
         socket.emit("join", { gameId: gameId });
         //socket events
         socket.on(

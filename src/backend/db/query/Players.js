@@ -130,13 +130,7 @@ const hasWon = async ({ gameId: gameId, playerId: playerId }) => {
       playerId: playerId
     });
     const player = await getPlayer({ playerId: playerId });
-    if (handCount === "0") {
-      gameIo
-        .to(gameId)
-        .emit("playerWon", {
-          playerId: player.id,
-          user_name: player.user_name
-        });
+    if (handCount === 0) {
       return true;
     } else {
       return false;

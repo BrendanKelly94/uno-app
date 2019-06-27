@@ -286,7 +286,15 @@ module.exports = function(io) {
               gameId: gameId,
               playerId: playerId
             });
+            console.log(playerWon)
+
             if (playerWon) {
+              gameIo
+                .to(gameId)
+                .emit("playerWon", {
+                  playerId: player.id,
+                  user_name: player.user_name
+                });
               return true;
             } else {
               return await submitBotTurns({

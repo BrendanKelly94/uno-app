@@ -9,7 +9,7 @@ import useScale from "./utils/useScale.js";
 import useError from "./utils/useError.js"
 import io from "socket.io-client";
 
-const socket = io("/game", { transports: ["websocket"], upgrade: false });
+let socket = io("/game", { transports: ["websocket"], upgrade: false, autoConnect: false });
 
 function Lobby() {
   const [ login, setLogin ] = useContext(authStoreContext);
@@ -111,6 +111,7 @@ function Lobby() {
 
   async function initializeLobby() {
     errorHandler(async () => {
+      socket = io("/game", { transports: ["websocket"], upgrade: false})
       socket.emit("join", { gameId: gameId });
       const joinReq = new ApiEndpoint(`/api/game/${gameId}`);
       const joinData = await joinReq.postReq({ name: login.user_name });
@@ -144,6 +145,7 @@ function Lobby() {
   //cdm
   useEffect(
     () => {
+
       initializeLobby();
 
       socket.on("start", data => {

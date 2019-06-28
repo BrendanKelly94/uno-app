@@ -47,7 +47,7 @@ function App() {
   const [chatToggle, setChatToggle] = useState(false);
   const [hasEnded, setHasEnded] = useState(false);
   const [wonName, setWonName] = useState(null);
-
+  const [socketInit, setSocketInit] = useState(false);
   const scaleFactor = useScale();
   const [error, errorHandler] = useError(); //errorHandler is curried
   const newCardRef = useRef(null);
@@ -233,6 +233,7 @@ function App() {
       if (myId !== null) {
         socket = io("/game", { transports: ["websocket"], upgrade: false })
         socket.emit("join", { gameId: gameId });
+        setSocketInit(true);
         //socket events
         socket.on(
           "newTurn",
@@ -497,6 +498,7 @@ function App() {
       <Chat
         chatToggle={chatToggle}
         socket={socket}
+        socketInit={socketInit}
         gameId={gameId}
         userName={login.user_name}
         scale={scaleFactor.size}

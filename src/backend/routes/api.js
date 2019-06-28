@@ -286,8 +286,6 @@ module.exports = function(io) {
               gameId: gameId,
               playerId: playerId
             });
-            console.log(playerWon)
-
             if (playerWon) {
               gameIo
                 .to(gameId)

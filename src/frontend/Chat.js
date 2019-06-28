@@ -5,6 +5,7 @@ import TextField from "@material-ui/core/TextField";
 function Chat({
   chatToggle,
   socket,
+  socketInit,
   gameId,
   userName,
   setCurrentMessage,
@@ -81,7 +82,7 @@ function Chat({
         setCurrentMessage({ message: data.message, userName: data.user_name });
       });
     },
-    [first]
+    [socketInit]
   );
 
   return (

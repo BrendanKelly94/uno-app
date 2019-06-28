@@ -24,6 +24,7 @@ function Lobby() {
   const location = history.location.pathname.split("/");
   const gId = parseInt(location[location.length - 1], 10);
   const [gameId, setGameId] = useState(gId);
+  const [socketInit, setSocketInit] = useState(false);
 
   const lobbyContainer = useRef(null);
   const quitButton = useRef(null);
@@ -113,6 +114,7 @@ function Lobby() {
     errorHandler(async () => {
       socket = io("/game", { transports: ["websocket"], upgrade: false})
       socket.emit("join", { gameId: gameId });
+      setSocketInit(true);
       const joinReq = new ApiEndpoint(`/api/game/${gameId}`);
       const joinData = await joinReq.postReq({ name: login.user_name });
       const playersData = await new ApiEndpoint(
@@ -267,6 +269,7 @@ function Lobby() {
       <Chat
         chatToggle={chatToggle}
         socket={socket}
+        socketInit={socketInit}
         gameId={gameId}
         userName={login.user_name}
         scale={scaleFactor.size}

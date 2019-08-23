@@ -39,8 +39,10 @@ const Button = React.forwardRef(
       variant === "outlined" ? outlinedStyle : defaultStyle
     );
     const [animate, setAnimate] = useState(false);
+    const [transform, setTransform] = useState("");
     const circleRef = useRef(null);
-    const animateRef = useRef(null);
+    const opacityRef = useRef(null);
+    const transformRef = useRef(null);
     const svgRef = useRef(null);
 
     const first = null;
@@ -71,9 +73,10 @@ const Button = React.forwardRef(
       const rect = circleRef.current.getBoundingClientRect();
       const circleX = rect.x + rect.width / 2;
       const circleY = rect.y + rect.height / 2;
-      circleRef.current.style.transform = `translate(${e.clientX -
-        circleX}px, ${e.clientY - circleY}px)`;
-      animateRef.current.beginElement();
+      setTransform(`translate(${e.clientX -
+        circleX}, ${e.clientY - circleY})`);
+      transformRef.current.beginElement();
+      opacityRef.current.beginElement();
       onClick();
     }
 
@@ -82,6 +85,15 @@ const Button = React.forwardRef(
         setButtonStyle(buttonStyle);
       },
       [color]
+    );
+
+    useEffect(
+      () => {
+        setTimeout(() => {
+          setTransform("");
+        }, 500)
+      },
+      [transform]
     );
 
     return (
@@ -99,18 +111,28 @@ const Button = React.forwardRef(
               cx="50%"
               cy="50%"
               r="0"
+              transform={transform}
               fill={`${color}`}
               style={{ opacity: 1, transformOrigin: "center" }}
             >
               <animate
-                ref={animateRef}
+                ref={transformRef}
                 attributeName="r"
                 from="0"
-                to="200"
+                to="200%"
                 dur=".5s"
                 repeatCount="0"
                 begin="indefinite"
                 fill="remove"
+              />
+
+              <animate
+                ref={opacityRef}
+                attributeName="opacity"
+                from="1"
+                to="0"
+                dur=".5s"
+                repeatCount="0"
               />
             </circle>
           </svg>

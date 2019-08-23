@@ -126,7 +126,7 @@ const Player = React.memo(
     return (
       <React.Fragment>
         <div style={containerStyle}>
-          <PlayerIndicator isMyTurn={isMyTurn} scale={scale} />
+          <PlayerIndicator isMyTurn={isMyTurn} scale={scale} pId = {pId}/>
           <div id={`player-${pId}-name`} style={nameStyle}>
             {uName}
           </div>
